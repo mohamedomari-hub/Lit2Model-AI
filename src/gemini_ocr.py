@@ -9,7 +9,10 @@ from google.genai import types
 load_dotenv()
 
 
-def extract_equations_with_gemini(pdf_path: str) -> str:
+def extract_equations_with_gemini(
+    pdf_path: str,
+    equation_number: str = None):
+
     """
     Use Gemini as an optional fallback to extract equations from a PDF.
 
@@ -33,27 +36,45 @@ def extract_equations_with_gemini(pdf_path: str) -> str:
     if not pdf_file.exists():
         return f"Gemini OCR skipped: PDF not found at {pdf_path}"
 
-    prompt = """
-You are an equation extraction assistant for scientific mechanistic modelling papers.
+    prompt = f"""
+You are an OCR transcription system.
 
-Extract ONLY mathematical model equations from this PDF.
+Your ONLY task is to visually transcribe Equation ({equation_number})
+from the PDF exactly as written.
 
-Focus on:
-- ordinary differential equations
-- algebraic model equations
-- pharmacodynamic coupling functions
-- Hill/Emax/stimulation/inhibition functions
-- compartment equations
-- parameter relationships used in model equations
+IMPORTANT:
+You are NOT allowed to interpret, simplify,
+reconstruct, or rewrite equations.
+
+You must behave like a scientific OCR engine.
 
 Rules:
-- Copy equations as faithfully as possible.
-- Preserve symbols, subscripts, superscripts, and equation numbers.
-- Do not invent equations.
-- Do not simplify equations.
-- If an equation is unclear, mark it as UNCERTAIN.
-- Include nearby explanatory text only when needed to define symbols.
-- Return results in Markdown.
+- Find ONLY Equation ({equation_number}).
+- Copy symbols exactly as shown.
+- Preserve:
+  - 1+ or 1-
+  - parentheses
+  - fractions
+  - superscripts
+  - subscripts
+  - multiplication symbols
+  - numerator/denominator structure
+- Do NOT convert equations into standard Hill forms.
+- Do NOT infer missing mathematics.
+- Do NOT rewrite equations using your own understanding.
+- If part of the equation is unclear, write:
+  [UNCLEAR]
+- If uncertain, say:
+  OCR uncertain – requires human review.
+
+Return ONLY:
+
+Equation ({equation_number}):
+
+<exact transcription>
+
+OCR confidence:
+high / medium / low
 """
 
     try:

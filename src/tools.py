@@ -149,6 +149,20 @@ def retrieve_pdf_context(query: str) -> str:
 
     query_lower = query.lower()
 
+    # --------------------------------------------------
+    # Specific equation retrieval
+    # --------------------------------------------------
+
+    equation_match = re.search(
+        r"(equation|eq\.?|eq)\s*\(?(\d+)\)?",
+        query_lower
+    )
+
+    if equation_match:
+        return retrieve_equation_by_number_context(
+            query
+        )
+
     search_queries = [query]
 
     # --------------------------------------------------
@@ -471,6 +485,163 @@ def extract_parameters_from_pdf(_: str = "") -> str:
 
     return extracted_parameters
 
+def is_exact_equation_match(content: str, equation_number: str) -> bool:
+    """
+    Check whether content explicitly contains the requested equation number.
+    """
+
+    patterns = [
+        rf"\({equation_number}\)",
+        rf"\bequation\s+{equation_number}\b",
+        rf"\beq\.\s*{equation_number}\b",
+        rf"\beq\s+{equation_number}\b",
+    ]
+
+    content_lower = content.lower()
+
+    return any(
+        re.search(pattern, content_lower)
+        for pattern in patterns
+    )
+
+def retrieve_equation_by_number_context(query: str) -> str:
+    """
+    Retrieve a specific numbered equation from the PDF.
+
+    Examples:
+    - Explain equation 7
+    - What does Eq. (4) mean?
+    - Explain eq 10
+    """
+
+    if VECTOR_STORE is None:
+        return "Vector store is not initialized."
+
+    query_lower = query.lower()
+
+    equation_match = re.search(
+        r"(equation|eq\.?|eq)\s*\(?(\d+)\)?",
+        query_lower
+    )
+
+    if not equation_match:
+        return (
+            "No equation number detected. "
+            "Please specify something like: "
+            "'Explain equation 7'."
+        )
+
+    equation_number = equation_match.group(2)
+
+    search_queries = [
+        query,
+
+        # Exact equation references
+        f"Equation {equation_number}",
+        f"equation {equation_number}",
+        f"Eq {equation_number}",
+        f"Eq. {equation_number}",
+        f"eq {equation_number}",
+        f"eq. {equation_number}",
+        f"({equation_number})",
+        f"equation ({equation_number})",
+
+        # Context around equations
+        f"equation {equation_number} model",
+        f"equation {equation_number} differential equation",
+        f"equation {equation_number} parameter",
+        f"equation {equation_number} explanation",
+        f"mathematical model equation {equation_number}",
+    ]
+
+    exact_results = []
+    fallback_results = []
+    seen = set()
+
+    for search_query in search_queries:
+
+        docs = VECTOR_STORE.similarity_search(
+            search_query,
+            k=6
+        )
+
+        print(
+            f"\nRetrieved for query: {search_query}"
+        )
+
+        for doc in docs:
+
+            chunk_key = _make_chunk_key(doc)
+
+            if chunk_key in seen:
+                continue
+
+            seen.add(chunk_key)
+
+            content = doc.page_content
+
+            is_exact_match = is_exact_equation_match(
+                content=content,
+                equation_number=equation_number
+            )
+
+            if "picture intentionally omitted" in content.lower():
+                content = (
+                    "[EQUATION OCR WARNING: "
+                    "Displayed equation may have been omitted "
+                    "by the parser and could require OCR "
+                    "or human review.]\n"
+                    + content
+                )
+
+            header = format_doc_metadata(
+                doc=doc,
+                search_query=search_query,
+                label="Equation Search Query"
+            )
+
+            entry = (
+                f"{header} | Exact Match: {is_exact_match}\n"
+                f"{content}"
+            )
+
+            if is_exact_match:
+                exact_results.append(entry)
+            else:
+                fallback_results.append(entry)
+            
+            print(doc.page_content[:300])
+
+    if exact_results:
+        return "\n\n---\n\n".join(exact_results)
+    
+    if ACTIVE_PDF_PATH is not None:
+        gemini_context = extract_equations_with_gemini(
+        ACTIVE_PDF_PATH, equation_number=equation_number)
+
+        fallback_text = "\n\n---\n\n".join(fallback_results)
+
+        return f"""
+    No exact Equation {equation_number} match was found in text retrieval.
+
+    Gemini OCR was triggered to inspect the PDF for equation images.
+
+    GEMINI EQUATION OCR CONTEXT:
+    {gemini_context}
+
+    FALLBACK RETRIEVED CONTEXT:
+    {fallback_text}
+    """
+
+    if fallback_results:
+        return (
+            f"No exact Equation {equation_number} match was found.\n\n"
+            f"Fallback retrieved context:\n\n"
+            + "\n\n---\n\n".join(fallback_results)
+        )
+
+    return f"No context found for Equation {equation_number}."
+
 def retrieve_equation_context() -> str:
     """
     Helper function: retrieve equation-specific context.
@@ -553,16 +724,11 @@ def extract_equations(equation_context: str) -> str:
     - If Gemini OCR failed or parser omitted equation images, explicitly say equations require human review.
 
     Important distinction rules:
-    - Distinguish between mathematical equations, parameter definitions,
-    variable descriptions, mechanistic explanations, and assumptions.
-    - Only classify content as an equation if it expresses a mathematical relationship
-    between quantities.
-    - Do not classify textual descriptions of symbols, units, mechanisms,
-    or parameter-table entries as equations.
-    - If a mathematical equation is referenced but visually omitted,
-    partially missing, or OCR is incomplete, place it under inferred_or_missing_equations.
-    - Distinguish explicitly reported equations from partially observed equations,
-    inferred model structure, and missing information.
+    - Distinguish between mathematical equations, parameter definitions, variable descriptions, mechanistic explanations, and assumptions.
+    - Only classify content as an equation if it expresses a mathematical relationship between quantities.
+    - Do not classify textual descriptions of symbols, units, mechanisms, or parameter-table entries as equations.
+    - If a mathematical equation is referenced but visually omitted, partially missing, or OCR is incomplete, place it under inferred_or_missing_equations.
+    - Distinguish explicitly reported equations from partially observed equations, inferred model structure, and missing information.
 
     Equation extraction rules:
     - Extract equations exactly as written.
@@ -570,13 +736,14 @@ def extract_equations(equation_context: str) -> str:
     - If an ODE is present, copy the full equation.
     - Do not summarize equations in words.
     - Prefer displayed equations over narrative descriptions.
-    - Include compartment equations, Hill functions, Emax/EC50/IC50 relationships,
-    algebraic couplings, balance equations, and delay/effect-compartment equations
-    only when they are explicitly present.
+    - Include compartment equations, Hill functions, Emax/EC50/IC50 relationships, algebraic couplings, balance equations, and delay/effect-compartment equations only when they are explicitly present.
+    - If an OCR-derived equation contains unusual exponents such as Cb^Cb, Ca^Ca, Ce^Ce, or a parameter raised to itself, mark it as suspicious and requiring human review. Do not treat it as validated. OCR validation rule:
+    - Treat Gemini OCR equations as candidate transcriptions, not validated equations.
+    - Do not silently correct OCR-derived equations.
+    - If the OCR equation has suspicious exponents, denominator changes, or unclear brackets, mark it as requiring human review.
 
     Variable-name formatting rule:
-    - If a biological/model term is written with hyphens, subscripts, or special characters,
-    treat it as one variable name unless the context clearly shows mathematical subtraction.
+    - If a biological/model term is written with hyphens, subscripts, or special characters, treat it as one variable name unless the context clearly shows mathematical subtraction.
     - Convert complex variable names to readable underscore notation only when needed.
     - Do not change the biological meaning.
 
@@ -586,11 +753,10 @@ def extract_equations(equation_context: str) -> str:
     - Do not add artificial divisions, missing powers, or missing denominators.
 
     Fallback rule:
-    - If the context says Gemini OCR failed, parser omitted images, or displayed equations were not retrieved:
-    do not invent equations.
-    Do not classify parameter descriptions as equations.
-    Place the affected equations under inferred_or_missing_equations.
-    Add a human_review_flags note.
+    - If the context says Gemini OCR failed, parser omitted images, or displayed equations were not retrieved: do not invent equations.
+    - Do not classify parameter descriptions as equations.
+    - Place the affected equations under inferred_or_missing_equations.
+    - Add a human_review_flags note.
 
     Context:
     {equation_context}
