@@ -4,8 +4,8 @@ import re
 
 import fitz
 
-from src.document.crops import render_pdf_page_for_equation
-from src.document.ocr import (
+from src.ingestion.crops import render_pdf_page_for_equation
+from src.ingestion.ocr import (
     extract_equation_with_gpt,
     extract_equation_with_pix2tex,
 )

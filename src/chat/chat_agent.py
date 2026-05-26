@@ -1,6 +1,6 @@
 from langchain.agents import create_agent
 
-from src.tools import (
+from src.chat.chat_tools import (
     propose_candidate_ode_model,
     retrieve_assumption_context,
     retrieve_equation_context,

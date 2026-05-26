@@ -5,7 +5,7 @@ import re
 import fitz
 
 from langchain_core.documents import Document
-from src.document.ocr import describe_figure_with_gemini
+from src.ingestion.ocr import describe_figure_with_gemini
 
 # --------------------------------------------------
 # Cost control

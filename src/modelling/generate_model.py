@@ -3,18 +3,18 @@ import re
 import json
 from langchain_openai import ChatOpenAI
 
-from src.document.artifact_index import (
+from src.ingestion.scientific_assets import (
     save_artifact_index,
     format_artifact_index_for_review,
 )
 
-from src.document.ocr import extract_equations_with_gemini
+from src.ingestion.ocr import extract_equations_with_gemini
 from src.modelling.equation_recovery import (
     extract_equation_candidates_from_text_layer,
     recover_missing_numbered_equations,
 )
 
-from src.document.artifact_index import (
+from src.ingestion.scientific_assets import (
     save_artifact_index,
     format_artifact_index_for_review,
 )

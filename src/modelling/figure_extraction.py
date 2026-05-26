@@ -4,8 +4,8 @@ import re
 import fitz
 from langchain_openai import ChatOpenAI
 
-from src.document.crops import render_pdf_page_to_image
-from src.document.ocr import describe_figure_with_gemini
+from src.ingestion.crops import render_pdf_page_to_image
+from src.ingestion.ocr import describe_figure_with_gemini
 from src.retrieval import format_doc_metadata, make_chunk_key
 
 VECTOR_STORE = None

@@ -35,7 +35,7 @@ from src.app.config import (
 
 )
 
-from src.discovery.rag_controlled_discovery import run_controlled_discovery
+from src.discovery.run_model_discovery import run_controlled_discovery
 from src.app.io import (
     append_latest_answer_to_review_draft,
     load_review_file,
@@ -44,21 +44,21 @@ from src.app.io import (
 )
 from src.app.state import reset_workflow_state
 from src.app.theme import apply_theme
-from src.document.ingestion import parse_pdf_multimodal
-from src.document.ocr import (
+from src.ingestion.pdf_parser import parse_pdf_multimodal
+from src.ingestion.ocr import (
     extract_visible_equations_with_gpt,
 )
-from src.rag import build_vector_store, load_vector_store, get_chroma_dir
-from src.tools import (
+from src.retrieval.vector_store import build_vector_store, load_vector_store, get_chroma_dir
+from src.chat.chat_tools import (
     set_vector_store,
     set_active_pdf_path,
     propose_candidate_ode_model,
 )
-from src.agent import build_agent
-from src.modelling.simulation_planner import infer_simulation_requirements
-from src.modelling.model_generator import save_generated_python_model
+from src.chat.chat_agent import build_agent
+from src.modelling.plan_simulations import infer_simulation_requirements
+from src.modelling.generate_model import save_generated_python_model
 
-from src.modelling.equation_validation import parse_equations
+from src.modelling.validate_model import parse_equations
 from src.ui.renderers import (
     render_markdown_with_latex,
     render_mermaid,

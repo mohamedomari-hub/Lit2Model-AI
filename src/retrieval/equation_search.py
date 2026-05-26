@@ -1,7 +1,7 @@
 import os
 import re
 
-from src.document.ocr import extract_visible_equations_with_gpt
+from src.ingestion.ocr import extract_visible_equations_with_gpt
 from src.retrieval.context import retrieve_equation_context_service
 
 

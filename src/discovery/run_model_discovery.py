@@ -10,8 +10,8 @@ from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-from src.document.ingestion import extract_equation_candidates_with_pymupdf
-from src.document.ocr import extract_visible_equations_with_gpt
+from src.ingestion.pdf_parser import extract_equation_candidates_with_pymupdf
+from src.ingestion.ocr import extract_visible_equations_with_gpt
 from src.discovery.discovery_prompts import SYSTEM_PROMPT
 from src.retrieval.equation_search import (
     search_equation_candidates,
