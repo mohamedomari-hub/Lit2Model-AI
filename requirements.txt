@@ -14,3 +14,4 @@ networkx
 marker-pdf
 pymupdf4llm
 sympy
+streamlit-mic-recorder

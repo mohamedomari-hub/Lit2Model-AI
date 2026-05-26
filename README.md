@@ -434,7 +434,7 @@ better figure understanding
 
 # Cost Expectations
 
-## Does running `python app.py` always cost money?
+## Does running `streamlit run chatbot_app.py` always cost money?
 
 ### No.
 
@@ -583,7 +583,6 @@ lit2model-ai/
 │   ├── candidate_model.py
 │   └── extracted_images/
 │
-├── app.py
 │
 ├── .env
 │
@@ -683,7 +682,7 @@ USE_VISION = False
 Run:
 
 ```bash
-python app.py
+streamlit run chatbot_app.py
 ```
 
 ---
@@ -722,7 +721,7 @@ rm outputs/extracted_images/*.txt
 Then rerun:
 
 ```bash
-python app.py
+streamlit run chatbot_app.py
 ```
 
 Useful when:
@@ -829,7 +828,7 @@ LangSmith makes the hidden workflow visible.
 A typical run may look like:
 
 ```text
-app.py
+chatbot_app.py
     ↓
 agent.invoke()
     ↓
@@ -875,7 +874,7 @@ LANGSMITH_PROJECT=lit2model-ai
 Then run:
 
 ```bash
-python app.py
+streamlit run chatbot_app.py
 ```
 
 Open dashboard:
@@ -948,7 +947,7 @@ rm -rf chroma_db
 Then rerun:
 
 ```bash
-python app.py
+streamlit run chatbot_app.py
 ```
 
 ---

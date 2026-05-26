@@ -1,5 +1,5 @@
 import re
-from sympy import symbols, sympify
+from sympy import sympify
 
 
 def extract_equations(reviewed_extraction: str):

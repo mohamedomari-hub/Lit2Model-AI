@@ -1,30 +1,10 @@
-# Secrets
-.env
-
-# Vector databases / generated stores
-chroma_db/
-
-# Generated outputs
-outputs/
-extracted_images/
-gemini_pages/
-
-# Python cache
+.DS_Store
 __pycache__/
 *.pyc
-*.pyo
-
-# System files
-.DS_Store
-
-# Local notebooks/checkpoints
-.ipynb_checkpoints/
-
-# Local/temporary experience notes if private
-Experience/
-
-# Large/private PDFs
-*.pdf
-
-# unfinished code
-app.py
+.venv/
+venv/
+.env
+outputs/
+data/
+.cache/
+.streamlit/secrets.toml
