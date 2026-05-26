@@ -1,3 +1,5 @@
+"""Build and format indexes of scientific equations, tables, and figures."""
+
 import json
 import os
 import re
@@ -920,4 +922,3 @@ def _deduplicate_equation_candidates(
             grouped[key] = item
 
     return list(grouped.values())
-

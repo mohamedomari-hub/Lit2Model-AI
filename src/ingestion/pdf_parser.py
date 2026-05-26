@@ -1,3 +1,5 @@
+"""Parse scientific PDFs into documents, chunks, and extracted assets."""
+
 import os
 import re
 import fitz

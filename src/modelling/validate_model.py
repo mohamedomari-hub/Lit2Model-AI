@@ -3,6 +3,8 @@ from sympy import sympify
 
 from src.modelling.consistency_checks import *
 
+# TODO: later merge consistency checks into validate_model
+
 
 def extract_equations(reviewed_extraction: str):
     """
