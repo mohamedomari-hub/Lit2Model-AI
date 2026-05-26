@@ -99,6 +99,11 @@ DISCOVERY_QUERIES = [
     ),
 ]
 
+# TODO: Parameter evidence is currently mixed into DISCOVERY_QUERIES.
+# Move it to search_parameter_evidence() only when output formatting is preserved.
+# TODO: Mechanism evidence is currently mixed into DISCOVERY_QUERIES.
+# Move it to search_mechanism_evidence() only when output formatting is preserved.
+
 TABLE_QUERIES = [
     "Table parameter values units symbol explanation",
     "Table initial values component state unit",
