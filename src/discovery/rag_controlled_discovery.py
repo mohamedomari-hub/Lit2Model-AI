@@ -18,6 +18,7 @@ from src.retrieval.equation_search import (
 )
 from src.retrieval.figure_search import search_figures
 from src.retrieval.mechanism_search import search_mechanisms
+from src.retrieval.paper_search import search_discovery_context
 from src.retrieval.paper_search import search_paper
 from src.retrieval.paper_search import search_paper_docs
 from src.retrieval.parameter_search import search_parameters
@@ -410,37 +411,12 @@ def retrieve_discovery_context(
     # metadata, deduplication, and equation candidate scanning.
     # Later this should be moved into src/retrieval/paper_search.py.
     # Kept custom discovery logic for now.
-    retrieved_docs = []
-
-    for query in DISCOVERY_QUERIES:
-        retrieved_docs.extend(
-            search_paper_docs(vector_store, query=query, k=k_per_query)
-        )
-
-    unique_docs = _deduplicate_docs(retrieved_docs)
-
-    retrieved_blocks = []
-    total_chars = 0
-
-    for i, doc in enumerate(unique_docs, start=1):
-        text = (doc.page_content or "").strip()
-
-        if not text:
-            continue
-
-        metadata = getattr(doc, "metadata", {}) or {}
-        page = metadata.get("page") or metadata.get("page_number") or "unknown"
-
-        block = f"""
-=== RETRIEVED CONTEXT {i} | page {page} ===
-{text}
-"""
-
-        if total_chars + len(block) > max_total_chars:
-            break
-
-        retrieved_blocks.append(block)
-        total_chars += len(block)
+    unique_docs, retrieved_context = search_discovery_context(
+        vector_store=vector_store,
+        discovery_queries=DISCOVERY_QUERIES,
+        k_per_query=k_per_query,
+        max_total_chars=max_total_chars,
+    )
 
     equation_candidates = search_equation_candidates(
         vector_store=vector_store,
@@ -470,7 +446,7 @@ If equations here define related model terms, group them into process_modules.
 
 GENERAL RETRIEVED CONTEXT
 
-{"".join(retrieved_blocks)}
+{retrieved_context}
 """
 
 def retrieve_table_evidence(
