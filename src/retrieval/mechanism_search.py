@@ -37,6 +37,18 @@ def _deduplicate_mechanism_docs(docs):
     return list(unique.values())
 
 
+def search_mechanism_docs(
+    vector_store,
+    query: str,
+    k: int = 6,
+):
+    """
+    Return raw mechanism-related documents.
+    Used by discovery when metadata/page info is needed.
+    """
+    return vector_store.similarity_search(query, k=k)
+
+
 def search_mechanism_evidence(
     vector_store,
     mechanism_queries,
@@ -52,7 +64,7 @@ def search_mechanism_evidence(
 
     for query in mechanism_queries:
         retrieved_docs.extend(
-            vector_store.similarity_search(query, k=k_per_query)
+            search_mechanism_docs(vector_store, query=query, k=k_per_query)
         )
 
     unique_docs = _deduplicate_mechanism_docs(retrieved_docs)

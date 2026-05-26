@@ -37,6 +37,18 @@ def _deduplicate_parameter_docs(docs):
     return list(unique.values())
 
 
+def search_parameter_docs(
+    vector_store,
+    query: str,
+    k: int = 6,
+):
+    """
+    Return raw parameter-related documents.
+    Used by discovery when metadata/page info is needed.
+    """
+    return vector_store.similarity_search(query, k=k)
+
+
 def search_parameter_evidence(
     vector_store,
     parameter_queries,
@@ -52,7 +64,7 @@ def search_parameter_evidence(
 
     for query in parameter_queries:
         retrieved_docs.extend(
-            vector_store.similarity_search(query, k=k_per_query)
+            search_parameter_docs(vector_store, query=query, k=k_per_query)
         )
 
     unique_docs = _deduplicate_parameter_docs(retrieved_docs)
