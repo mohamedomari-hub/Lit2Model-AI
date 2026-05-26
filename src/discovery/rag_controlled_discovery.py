@@ -12,20 +12,11 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 
 from src.document.ingestion import extract_equation_candidates_with_pymupdf
 from src.document.ocr import extract_visible_equations_with_gpt
-from src.retrieval.equation_search import search_equations
 from src.retrieval.equation_search import (
     search_equation_candidates,
 )
-from src.retrieval.figure_search import search_figures
-from src.retrieval.mechanism_search import search_mechanisms
 from src.retrieval.paper_search import search_discovery_context
-from src.retrieval.paper_search import search_paper
-from src.retrieval.paper_search import search_paper_docs
-from src.retrieval.parameter_search import search_parameters
-from src.retrieval.simulation_search import search_simulations
-from src.retrieval.table_search import search_tables
 from src.retrieval.table_search import search_table_evidence
-from src.retrieval.table_search import search_table_docs
 from src.review.compact_formatter import format_compact_review
 
 
@@ -323,6 +314,7 @@ def _deduplicate_docs(docs: list[Any]) -> list[Any]:
 
     return list(unique.values())
 
+# TODO: Keep these legacy equation helpers until shared equation retrieval is fully verified.
 def looks_like_corrupted_equation_candidate(text: str) -> bool:
     """
     Detect equation candidates where PDF text extraction likely damaged math layout.
