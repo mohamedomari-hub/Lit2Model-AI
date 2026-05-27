@@ -13,17 +13,28 @@ from src.app.config import (
 
 def nav_button(label: str, target_mode: str):
     is_active = st.session_state.mode == target_mode
+    discovery_running = st.session_state.get("discovery_running", False)
+    disable_navigation = (
+        discovery_running
+        and target_mode != "Run model discovery"
+    )
 
     if st.sidebar.button(
         label,
         key=f"nav_{target_mode}",
         use_container_width=True,
         type="primary" if is_active else "secondary",
+        disabled=disable_navigation,
     ):
         st.session_state.mode = target_mode
 
 
 def render_sidebar_navigation():
+    if st.session_state.get("discovery_running", False):
+        st.sidebar.warning(
+            "Model discovery is running. Please do not switch workflow pages until it finishes."
+        )
+
     st.sidebar.markdown(
         '<div class="sidebar-section-label">Explore paper</div>',
         unsafe_allow_html=True,

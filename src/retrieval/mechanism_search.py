@@ -2,6 +2,7 @@ import re
 from collections import OrderedDict
 
 from src.retrieval.context import retrieve_semantic_context
+from src.retrieval.ranking import sort_docs_by_evidence_score
 
 
 def search_mechanisms(
@@ -68,6 +69,10 @@ def search_mechanism_evidence(
         )
 
     unique_docs = _deduplicate_mechanism_docs(retrieved_docs)
+    unique_docs = sort_docs_by_evidence_score(
+        unique_docs,
+        evidence_type="mechanism",
+    )
 
     blocks = []
     total_chars = 0

@@ -2082,6 +2082,9 @@ elif mode == "Run model discovery":
             st.stop()
 
         st.session_state.discovery_running = True
+        st.warning(
+            "Model discovery is running. Please do not switch workflow pages until it finishes."
+        )
 
         progress_bar = st.progress(0)
         status_text = st.empty()

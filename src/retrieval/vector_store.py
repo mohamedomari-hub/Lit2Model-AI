@@ -114,8 +114,8 @@ def build_vector_store(
         shutil.rmtree(chroma_dir)
 
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=900,
-        chunk_overlap=200
+        chunk_size=1500,
+        chunk_overlap=300
     )
 
     chunks = splitter.split_documents(documents)

@@ -30,9 +30,12 @@ SEMANTIC_CONTEXTS = {
     "parameter": {
         "label": "Parameter Query",
         "templates": [
-            "model parameters values units estimated fixed reported table",
-            "parameter estimates initial conditions values units",
-            "rate constants coefficients EC50 IC50 Emax Hill units",
+            "parameter value unit estimated fitted calibrated fixed assumed",
+            "symbol value unit table parameter",
+            "maximum effect threshold half maximal concentration Hill exponent",
+            "rate constant clearance volume absorption elimination",
+            "initial value state variable parameter",
+            "model parameter values units",
         ],
         "entity": "{entity} parameter value unit",
         "k": 5,
@@ -62,7 +65,7 @@ SEMANTIC_CONTEXTS = {
         "templates": [
             "biological mechanism stimulation inhibition feedback regulation",
             "compartment interactions causal relationship model mechanism",
-            "Hill threshold Emax feedback effect mechanism",
+            "threshold maximum effect feedback effect mechanism",
         ],
         "entity": "{entity} mechanism stimulation inhibition feedback",
         "k": 5,
@@ -71,8 +74,11 @@ SEMANTIC_CONTEXTS = {
         "label": "Table Query",
         "templates": [
             "table caption rows columns values units parameters",
-            "supplementary table initial conditions experimental settings",
-            "parameter table estimated fixed reported values units",
+            "symbol value unit table parameter",
+            "parameter value unit estimated fitted calibrated fixed assumed",
+            "initial value state variable parameter",
+            "maximum effect threshold half maximal concentration Hill exponent",
+            "rate constant clearance volume absorption elimination",
         ],
         "entity": "Table {entity} caption values units",
         "k": 6,

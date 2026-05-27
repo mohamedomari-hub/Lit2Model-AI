@@ -2,6 +2,7 @@ import re
 from collections import OrderedDict
 
 from src.retrieval.context import retrieve_semantic_context
+from src.retrieval.ranking import sort_docs_by_evidence_score
 
 
 def search_parameters(
@@ -68,12 +69,17 @@ def search_parameter_evidence(
         )
 
     unique_docs = _deduplicate_parameter_docs(retrieved_docs)
+    unique_docs = sort_docs_by_evidence_score(
+        unique_docs,
+        evidence_type="parameter",
+    )
 
     blocks = []
     total_chars = 0
 
     parameter_markers = (
         "parameter",
+        "symbol",
         "value",
         "unit",
         "estimated",
@@ -81,7 +87,14 @@ def search_parameter_evidence(
         "fixed",
         "assumed",
         "calibrated",
+        "initial value",
+        "threshold",
+        "maximum effect",
+        "half maximal",
         "rate constant",
+        "clearance",
+        "volume",
+        "hill",
         "coefficient",
     )
 

@@ -2,6 +2,7 @@ import re
 from collections import OrderedDict
 
 from src.modelling.table_extraction import retrieve_table_context_service
+from src.retrieval.ranking import sort_docs_by_evidence_score
 
 
 def search_tables(
@@ -64,18 +65,34 @@ def search_table_evidence(
         )
 
     unique_docs = _deduplicate_table_docs(retrieved_docs)
+    unique_docs = sort_docs_by_evidence_score(
+        unique_docs,
+        evidence_type="table",
+    )
 
     blocks = []
     total_chars = 0
 
     table_markers = (
         "table",
+        "symbol",
         "| symbol",
+        "value",
         "| value",
+        "unit",
         "| unit",
         "initial value",
         "threshold",
         "parameter",
+        "estimated",
+        "fixed",
+        "calibrated",
+        "maximum effect",
+        "half maximal",
+        "rate constant",
+        "clearance",
+        "volume",
+        "hill",
         "rate",
     )
 

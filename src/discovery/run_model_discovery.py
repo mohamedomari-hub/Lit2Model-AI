@@ -517,7 +517,7 @@ def get_discovery_llm(model: str):
 def run_controlled_discovery(
     vector_store,
     pdf_path: str | None = None,
-    model: str = "gpt-4.1-mini",
+    model: str = "gpt-4o-mini",
     equation_candidates_dir: str | None = None,
 ) -> str:
     if pdf_path and equation_candidates_dir:

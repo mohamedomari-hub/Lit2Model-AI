@@ -77,6 +77,12 @@ Scientific rules:
 - Prefer evidence from equations, tables, figures, and explicit model descriptions.
 - Label interpretation as interpretation, not fact.
 
+For mechanism questions:
+- Do not give generic biological explanations.
+- Answer only mechanisms explicitly retrieved from the paper.
+- Prefer model mechanisms: state variables, equations, regulatory functions, stimulation/inhibition links, Hill functions, compartments, inputs, and outputs.
+- If evidence is weak, say so.
+
 For table questions:
 - Prioritize structured extraction over narrative explanation.
 - First summarize what the table contains.
