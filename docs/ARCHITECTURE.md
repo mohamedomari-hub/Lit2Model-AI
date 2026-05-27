@@ -28,15 +28,15 @@ Model discovery workflow. It builds discovery context, calls the LLM, normalizes
 
 PDF parsing, OCR, crop rendering, metadata helpers, and scientific artifact indexing.
 
-`src/extraction`
+`src/ingestion`
 
 Lower-level PDF text extraction and scientific chunk building.
 
-`src/modelling`
+`src/modeling`
 
 Model generation, validation, simulation planning, graph generation, equation recovery, table extraction, and figure extraction helpers.
 
-`src/llm`
+`src/discovery`
 
 Structured LLM extraction utilities.
 
@@ -44,7 +44,7 @@ Structured LLM extraction utilities.
 
 Pydantic/data schemas for extracted model components.
 
-`src/ui`
+`src/app`
 
 Streamlit UI rendering and sidebar helpers.
 
@@ -73,7 +73,7 @@ Examples:
 - `src/agent.py` imports from `src/chat/chat_agent.py`
 - `src/tools.py` imports from `src/chat/chat_tools.py`
 - `src/rag.py` imports from `src/retrieval/vector_store.py`
-- old `src/document/*` files import from `src/ingestion/*`
+- old `src/ingestion/*` files import from `src/ingestion/*`
 - old discovery/modeling files import from clearer new modules
 
 ## Current Stable Status

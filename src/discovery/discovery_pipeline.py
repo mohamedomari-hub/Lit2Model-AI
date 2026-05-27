@@ -4,11 +4,11 @@ import json
 import os
 from typing import Any
 
-from src.extraction.pdf_text import extract_pdf_pages, save_raw_pages
-from src.extraction.chunk_builder import build_scientific_chunks, save_scientific_chunks
-from src.llm.structured_extractor import extract_chunk_evidence
+from src.ingestion.pdf_text import extract_pdf_pages, save_raw_pages
+from src.ingestion.chunk_builder import build_scientific_chunks, save_scientific_chunks
+from src.discovery.structured_extractor import extract_chunk_evidence
 from src.schemas.evidence_schema import ChunkEvidence
-from src.review.evidence_formatter import format_extracted_evidence_for_review
+from src.discovery.evidence_formatter import format_extracted_evidence_for_review
 
 
 def _model_dump(obj) -> dict:

@@ -1,7 +1,7 @@
 import re
 from collections import OrderedDict
 
-from src.modelling.table_extraction import retrieve_table_context_service
+from src.modeling.table_extraction import retrieve_table_context_service
 from src.retrieval.ranking import sort_docs_by_evidence_score
 
 

@@ -18,7 +18,7 @@ from src.retrieval.equation_search import (
 )
 from src.retrieval.paper_search import search_discovery_context
 from src.retrieval.table_search import search_table_evidence
-from src.review.compact_formatter import format_compact_review
+from src.discovery.review_formatter import format_compact_review
 
 
 load_dotenv()

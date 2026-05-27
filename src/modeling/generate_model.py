@@ -9,7 +9,7 @@ from src.ingestion.scientific_assets import (
 )
 
 from src.ingestion.ocr import extract_equations_with_gemini
-from src.modelling.equation_recovery import (
+from src.modeling.equation_recovery import (
     extract_equation_candidates_from_text_layer,
     recover_missing_numbered_equations,
 )
@@ -19,7 +19,7 @@ from src.ingestion.scientific_assets import (
     format_artifact_index_for_review,
 )
 
-from src.modelling.graph_generation import (
+from src.modeling.graph_generation import (
     extract_mechanism_edges_service,
     generate_mechanism_graph_service,
 )

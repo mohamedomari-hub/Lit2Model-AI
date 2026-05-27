@@ -1,4 +1,4 @@
-from src.modelling.figure_extraction import retrieve_figure_context_service
+from src.modeling.figure_extraction import retrieve_figure_context_service
 
 
 def search_figures(

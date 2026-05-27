@@ -55,18 +55,18 @@ from src.chat.chat_tools import (
     propose_candidate_ode_model,
 )
 from src.chat.chat_agent import build_agent
-from src.modelling.plan_simulations import infer_simulation_requirements
-from src.modelling.generate_model import save_generated_python_model
+from src.modeling.plan_simulations import infer_simulation_requirements
+from src.modeling.generate_model import save_generated_python_model
 
-from src.modelling.validate_model import parse_equations
-from src.ui.renderers import (
+from src.modeling.validate_model import parse_equations
+from src.app.renderers import (
     render_discovery_review,
     render_markdown_with_latex,
     render_mermaid,
     render_pdf_viewer,
     render_review_model_card_preview,
 )
-from src.ui.sidebar import render_sidebar_navigation, render_workflow_status
+from src.app.sidebar import render_sidebar_navigation, render_workflow_status
 from src.discovery.discovery_pipeline import run_llm_first_discovery_markdown
 
 
@@ -395,10 +395,6 @@ def show_project_mechanism_flowchart():
         load_json_file(PROJECT_DRAFT_JSON_PATH)
         or load_json_file(PROJECT_EVIDENCE_JSON_PATH)
     )
-
-    if not extracted_json:
-        st.info("No mechanism flowchart JSON found yet.")
-        return
 
     mermaid_code = extracted_json.get("mechanism_flowchart", "")
 

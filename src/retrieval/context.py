@@ -210,7 +210,7 @@ def retrieve_equation_context_service(
 ) -> str:
     import re
 
-    from src.modelling.equation_recovery import retrieve_numbered_equation_context
+    from src.modeling.equation_recovery import retrieve_numbered_equation_context
 
     if equation_number:
         return retrieve_numbered_equation_context(

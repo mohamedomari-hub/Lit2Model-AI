@@ -1,6 +1,6 @@
 from langchain_core.tools import tool
 
-from src.modelling.generate_model import (
+from src.modeling.generate_model import (
     compile_reviewed_model_scaffold,
     run_model_discovery_pipeline,
 )

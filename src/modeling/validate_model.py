@@ -1,7 +1,7 @@
 import re
 from sympy import sympify
 
-from src.modelling.consistency_checks import *
+from src.modeling.consistency_checks import *
 
 # TODO: later merge consistency checks into validate_model
 
