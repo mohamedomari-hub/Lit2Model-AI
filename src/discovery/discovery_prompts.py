@@ -189,4 +189,17 @@ Exact transcription is preferred over interpretation.
 - If a model term is defined in another equation, include both equations in the same process module.
 - Prefer GLOBAL EQUATION CANDIDATES over free interpretation.
 - If uncertain, copy the closest equation candidate and mark requires_review.
+
+Additional reliability rules for scientific model extraction
+
+- Table values must be copied by symbol, not by neighboring derived formulas.
+- If a table reports parameter A with value/unit, do not assign that value to derived parameter B.
+- If text says B = A * C, then B is derived and the formula must be recorded.
+- Do not convert an elimination rate constant into clearance unless the value is explicitly computed or reported.
+- If an equation candidate defines a modifier/effect term, include it in process_modules.
+- If a process equation uses a modifier term and another equation defines that modifier, both must be included in the same process module.
+- If equation candidates include numbered equations that are not extracted, add them to missing_for_simulation or mark the relevant module requires_review.
+- Prefer OCR-repaired equation candidates over formula-not-decoded text.
+- For Hill/Emax/saturating functions, preserve exponents and threshold parameters exactly.
+- Exact extraction is better than interpretation.
 """

@@ -178,6 +178,18 @@ def apply_theme():
                 color: #991b1b !important;
                 background: #fecaca !important;
             }
+
+            .sticky-right-panel-marker {
+                display: none !important;
+            }
+
+            div[data-testid="stVerticalBlock"]:has(.sticky-right-panel-marker) {
+                position: sticky !important;
+                top: 1rem !important;
+                max-height: calc(100vh - 2rem) !important;
+                overflow-y: auto !important;
+                padding-right: 0.25rem !important;
+            }
         </style>
         """,
         unsafe_allow_html=True,

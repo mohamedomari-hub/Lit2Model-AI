@@ -1809,6 +1809,12 @@ if mode == "Ask paper questions":
     # RIGHT COLUMN: PDF ONLY
     # ==========================
     with pdf_col:
+        # Keep PDF viewer visible while left content scrolls.
+        st.markdown(
+            '<span class="sticky-right-panel-marker"></span>',
+            unsafe_allow_html=True,
+        )
+
         pdf_zoom = st.slider(
             "PDF zoom",
             min_value=1.0,
@@ -2476,6 +2482,12 @@ elif mode == "Review & Validate Model":
                         st.rerun()
 
     with right:
+        # Keep PDF/crop viewer visible while left content scrolls.
+        st.markdown(
+            '<span class="sticky-right-panel-marker"></span>',
+            unsafe_allow_html=True,
+        )
+
         st.markdown("## Equation recovery")
 
         with st.expander("Missing Equation Recovery", expanded=True):

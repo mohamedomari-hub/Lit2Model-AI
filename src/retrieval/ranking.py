@@ -81,6 +81,11 @@ def score_scientific_evidence(text: str, evidence_type: str = "general") -> int:
     ]
 
     mechanism_keywords = [
+        "equation",
+        "state variable",
+        "compartment",
+        "effect compartment",
+        "rate constant",
         "mechanism",
         "interaction",
         "feedback",
@@ -93,6 +98,11 @@ def score_scientific_evidence(text: str, evidence_type: str = "general") -> int:
         "threshold",
         "saturation",
         "hill",
+        "modifier",
+        "effect function",
+        "parameter",
+        "input",
+        "output",
     ]
 
     keywords = list(general_keywords)
@@ -107,6 +117,30 @@ def score_scientific_evidence(text: str, evidence_type: str = "general") -> int:
     for keyword in keywords:
         if keyword in text_lower:
             score += 1
+
+    if evidence_type == "mechanism":
+        model_terms = [
+            "equation",
+            "model",
+            "compartment",
+            "function",
+            "state variable",
+            "parameter",
+        ]
+        explanation_only_terms = [
+            "distribution delay",
+            "receptor binding",
+            "physiological changes",
+        ]
+
+        has_model_term = any(term in text_lower for term in model_terms)
+        has_explanation_only_term = any(
+            term in text_lower
+            for term in explanation_only_terms
+        )
+
+        if has_explanation_only_term and not has_model_term:
+            score -= 2
 
     return score
 

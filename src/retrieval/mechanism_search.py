@@ -78,6 +78,11 @@ def search_mechanism_evidence(
     total_chars = 0
 
     mechanism_markers = (
+        "equation",
+        "state variable",
+        "compartment",
+        "effect compartment",
+        "rate constant",
         "mechanism",
         "interaction",
         "feedback",
@@ -88,6 +93,13 @@ def search_mechanism_evidence(
         "transfer",
         "causal",
         "regulation",
+        "hill",
+        "nonlinear",
+        "modifier",
+        "effect function",
+        "parameter",
+        "input",
+        "output",
     )
 
     for i, doc in enumerate(unique_docs, start=1):
