@@ -1,4 +1,5 @@
 import base64
+import html
 import os
 import re
 
@@ -19,6 +20,92 @@ def render_markdown_with_latex(text: str):
     )
 
     st.markdown(text, unsafe_allow_html=True)
+
+
+def render_equation_block(equation_text: str):
+    """
+    Render one equation in a readable review style without changing saved content.
+    """
+    equation_text = (equation_text or "").strip()
+
+    if not equation_text:
+        st.markdown(
+            '<div class="discovery-equation-block">not reported</div>',
+            unsafe_allow_html=True,
+        )
+        return
+
+    safe_text = html.escape(equation_text)
+    st.markdown(
+        f'<div class="discovery-equation-block">{safe_text}</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def _last_non_empty_line(text: str) -> str:
+    lines = [line.strip() for line in (text or "").splitlines()]
+
+    for line in reversed(lines):
+        if line:
+            return line.lower()
+
+    return ""
+
+
+def render_discovery_review(text: str):
+    """
+    Render discovery markdown with polished equation blocks.
+    The underlying extracted markdown/JSON is not changed.
+    """
+    if not text:
+        return
+
+    st.markdown(
+        '<span class="discovery-review-marker"></span>',
+        unsafe_allow_html=True,
+    )
+
+    text = re.sub(
+        r"^\s*#\s+Model Discovery Review\s*\n+",
+        "",
+        text,
+        count=1,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(
+        r"^\s*status:\s*draft\s*/\s*requires human review\s*\n+",
+        "",
+        text,
+        count=1,
+        flags=re.IGNORECASE,
+    )
+
+    fence_pattern = re.compile(
+        r"```(?P<language>[A-Za-z0-9_-]*)\n(?P<body>.*?)\n```",
+        flags=re.DOTALL,
+    )
+
+    position = 0
+
+    for match in fence_pattern.finditer(text):
+        before = text[position:match.start()]
+        language = (match.group("language") or "").strip().lower()
+        body = match.group("body").strip()
+        if language == "text":
+            render_markdown_with_latex(before)
+            render_equation_block(body)
+        else:
+            render_markdown_with_latex(
+                before
+                + f"```{language}\n{body}\n```"
+            )
+
+        position = match.end()
+
+    remaining = text[position:]
+
+    if remaining.strip():
+        render_markdown_with_latex(remaining)
 
 
 @st.cache_data(show_spinner=False)

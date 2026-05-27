@@ -60,6 +60,7 @@ from src.modelling.generate_model import save_generated_python_model
 
 from src.modelling.validate_model import parse_equations
 from src.ui.renderers import (
+    render_discovery_review,
     render_markdown_with_latex,
     render_mermaid,
     render_pdf_viewer,
@@ -1565,6 +1566,7 @@ parser_mode = st.sidebar.selectbox(
         "pymupdf_fast",
     ],
     index=0,
+    label_visibility="collapsed",
     help=(
         "Docling = best scientific parser (recommended). "
         "PyMuPDF4LLM = fast baseline. "
@@ -1842,12 +1844,8 @@ if mode == "Ask paper questions":
             with st.chat_message(message["role"]):
                 render_markdown_with_latex(message["content"])
 
-        prompt = st.chat_input(
-            "Ask questions about the paper, i.e. equations, tables, figure, or mechanism ..."
+        prompt = None
 
-        )
-
-        st.markdown("#### Voice question")
 
         audio = mic_recorder(
             start_prompt="🎙️ Start recording",
@@ -1862,6 +1860,14 @@ if mode == "Ask paper questions":
                 prompt = transcribe_audio_bytes(audio["bytes"])
 
             st.success(f"You asked: {prompt}")
+
+        text_prompt = st.chat_input(
+            "Ask questions about the paper, i.e. equations, tables, figure, or mechanism ..."
+
+        )
+
+        if text_prompt:
+            prompt = text_prompt
 
     if prompt:
         st.session_state.messages.append(
@@ -2016,16 +2022,18 @@ Style:
 
 elif mode == "Run model discovery":
 
-    st.subheader("Run mechanistic model discovery")
-
-    st.write(
-        "Controlled discovery uses retrieved model-relevant context "
-        "and one compact LLM extraction call."
+    st.markdown(
+        """
+        <div class="page-title">
+            Run Mechanistic Model Discovery
+            <span class="page-title-note">- requires human review</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
     if st.session_state.model_discovery_result is not None:
-        st.markdown("### Latest discovery result")
-        render_markdown_with_latex(
+        render_discovery_review(
             st.session_state.model_discovery_result
         )
     
@@ -2154,7 +2162,7 @@ elif mode == "Run model discovery":
             progress_bar.progress(100)
             status_text.success("Model discovery completed.")
 
-            render_markdown_with_latex(answer)
+            render_discovery_review(answer)
 
             # --------------------------------------------------
             # Mechanism flowchart
@@ -2190,12 +2198,18 @@ elif mode == "Run model discovery":
 
 elif mode == "Review & Validate Model":
 
-    st.subheader("Review & Validate Model")
+    st.markdown(
+        '<div class="page-title">Review & Validate Model</div>',
+        unsafe_allow_html=True,
+    )
 
     left, right = st.columns([1.2, 1])
 
     with left:
-        st.markdown("## Structured reviewed model")
+        st.markdown(
+            '<div class="section-title">Structured reviewed model</div>',
+            unsafe_allow_html=True,
+        )
         draft_col, validated_col, download_col = st.columns(3)
 
 
@@ -2348,7 +2362,10 @@ elif mode == "Review & Validate Model":
 
                 if item["type"] == "missing_parameter":
 
-                    st.markdown(f"### Fix parameter: `{item.get('symbol')}`")
+                    st.markdown(
+                        f'<div class="small-title">Fix parameter: <code>{item.get("symbol")}</code></div>',
+                        unsafe_allow_html=True,
+                    )
 
                     col1, col2, col3 = st.columns(3)
 
@@ -2488,7 +2505,10 @@ elif mode == "Review & Validate Model":
             unsafe_allow_html=True,
         )
 
-        st.markdown("## Equation recovery")
+        st.markdown(
+            '<div class="section-title">Equation recovery</div>',
+            unsafe_allow_html=True,
+        )
 
         with st.expander("Missing Equation Recovery", expanded=True):
             missing_equations = load_json_file(PROJECT_MISSING_EQUATIONS_PATH) or []
@@ -2793,7 +2813,10 @@ elif mode == "Review & Validate Model":
 
 elif mode == "Simulation setup":
 
-    st.subheader("Simulation setup")
+    st.markdown(
+        '<div class="page-title">Simulation Setup</div>',
+        unsafe_allow_html=True,
+    )
 
     validated_review_json = load_json_file(PROJECT_FINAL_JSON_PATH)
     draft_review_json = load_json_file(PROJECT_DRAFT_JSON_PATH)
@@ -2808,7 +2831,7 @@ elif mode == "Simulation setup":
 
     if validated_review_json is None:
         st.info(
-            "Using working JSON draft for simulation setup. "
+            "Using JSON draft for simulation setup. "
             "Validate it when ready."
         )
     else:
@@ -2917,18 +2940,10 @@ elif mode == "Simulation setup":
 
 elif mode == "Generate Python Model":
 
-    st.subheader("Generate executable Python model")
-
-    st.info(
-            """
-        Workflow:
-        1. Run model discovery
-        2. Review and validate the model
-        3. Generate Python model
-        4. Choose solver
-        5. Run simulation
-        """
-        )
+    st.markdown(
+        '<div class="page-title">Generate Python Model</div>',
+        unsafe_allow_html=True,
+    )
 
     validated_review_json = load_json_file(PROJECT_FINAL_JSON_PATH)
     draft_review_json = load_json_file(PROJECT_DRAFT_JSON_PATH)
@@ -2967,8 +2982,10 @@ elif mode == "Generate Python Model":
     settings_col, code_col = st.columns([0.9, 1.25], gap="large")
 
     with settings_col:
-        st.markdown("### Model inputs")
-        st.caption("Provide simulation settings if available. Leave blank if unknown.")
+        st.markdown(
+            '<div class="section-title">Model inputs</div>',
+            unsafe_allow_html=True,
+        )
 
         simulation_time = st.text_input(
             "Simulation end time",
@@ -3020,7 +3037,10 @@ elif mode == "Generate Python Model":
     if st.session_state.generated_python_model:
 
         with code_col:
-            st.markdown("### Generated Python model")
+            st.markdown(
+                '<div class="section-title">Generated Python model</div>',
+                unsafe_allow_html=True,
+            )
 
             edited_generated_code = st.text_area(
                 "Generated Python code",
@@ -3050,7 +3070,10 @@ elif mode == "Generate Python Model":
         # -----------------------------------------
 
         with settings_col:
-            st.markdown("### Simulation options")
+            st.markdown(
+                '<div class="section-title">Simulation options</div>',
+                unsafe_allow_html=True,
+            )
 
             solver = st.selectbox(
                 "Choose solver",
