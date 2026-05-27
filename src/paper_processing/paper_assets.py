@@ -10,7 +10,7 @@ import fitz
 ENABLE_LLM_CANDIDATE_CLASSIFIER = True
 MAX_LLM_CANDIDATES = 8
 
-from src.ingestion.candidate_classifier import (
+from src.paper_processing.content_classifier import (
     classify_equation_candidate,
 )
 

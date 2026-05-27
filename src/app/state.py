@@ -1,3 +1,7 @@
+"""
+Session-state reset helpers for the Streamlit workflow.
+"""
+
 import os
 import shutil
 

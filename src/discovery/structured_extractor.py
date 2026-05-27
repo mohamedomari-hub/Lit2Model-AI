@@ -1,3 +1,7 @@
+"""
+Calls the LLM to extract structured evidence from scientific chunks.
+"""
+
 from __future__ import annotations
 
 import json

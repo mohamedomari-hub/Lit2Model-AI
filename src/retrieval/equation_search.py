@@ -1,8 +1,13 @@
+"""
+Shared equation retrieval helpers for Q/A and discovery.
+"""
+
 import os
 import re
+from collections import OrderedDict
 
-from src.ingestion.ocr import extract_visible_equations_with_gpt
-from src.retrieval.context import retrieve_equation_context_service
+from src.paper_processing.ocr import extract_visible_equations_with_gpt
+from src.retrieval.search_engine import retrieve_equation_context_service
 
 
 def search_equations(
@@ -91,15 +96,88 @@ Use OCR transcription below as higher-priority evidence.
         )
 
 
+def _clean_candidate_key(text: str) -> str:
+    text = (text or "").lower()
+    text = re.sub(r"\s+", " ", text)
+    return text[:1200]
+
+
+def _get_page_label(metadata: dict) -> str:
+    return (
+        metadata.get("page")
+        or metadata.get("page_number")
+        or "unknown"
+    )
+
+
+def _get_equation_group_key(metadata: dict, text: str):
+    image_path = metadata.get("image_path")
+    equation_number = metadata.get("equation_number")
+    page = _get_page_label(metadata)
+
+    if image_path:
+        return ("image", image_path)
+
+    if equation_number:
+        return ("equation", page, equation_number)
+
+    return ("text", page, _clean_candidate_key(text))
+
+
+def _format_equation_candidate(metadata: dict, text: str) -> str:
+    page = _get_page_label(metadata)
+    equation_number = metadata.get("equation_number") or "unknown"
+    image_path = metadata.get("image_path") or "not reported"
+
+    return f"""
+[page {page} | equation {equation_number}]
+image_path: {image_path}
+{text.strip()}
+"""
+
+
+def _has_strong_equation_signal(text: str) -> bool:
+    text = text or ""
+    text_lower = text.lower()
+
+    strong_markers = [
+        "formula-not-decoded",
+        "d/dt",
+        "\\frac",
+        "frac{",
+        "∂",
+    ]
+
+    for marker in strong_markers:
+        if marker in text_lower:
+            return True
+
+    if re.search(r"\bd\s*[A-Za-z][A-Za-z0-9_]*\s*/\s*dt\b", text):
+        return True
+
+    assignment_match = re.search(
+        r"(^|\n)\s*[A-Za-z][A-Za-z0-9_{}\\\-\u2212]{0,40}\s*=",
+        text,
+    )
+
+    if assignment_match:
+        return True
+
+    return False
+
+
 def search_equation_candidates(
     vector_store,
     max_equation_candidates: int = 500,
+    enable_ocr_repair: bool = False,
 ):
     """
     Return equation candidate blocks from retrieved text.
     Shared helper for model discovery and future Q/A.
     """
     equation_candidates = []
+    raw_candidate_count = 0
+    skipped_noise_count = 0
 
     try:
         collection = vector_store._collection.get(
@@ -112,6 +190,83 @@ def search_equation_candidates(
     except Exception:
         all_docs = []
         all_meta = []
+
+    grouped_candidates = OrderedDict()
+
+    for index, text in enumerate(all_docs):
+        metadata = {}
+
+        if index < len(all_meta):
+            metadata = all_meta[index] or {}
+
+        if metadata.get("content_type") != "equation_candidate":
+            continue
+
+        if not text or len(text.strip()) < 20:
+            continue
+
+        raw_candidate_count += 1
+
+        if not metadata.get("equation_number") and not _has_strong_equation_signal(text):
+            skipped_noise_count += 1
+            continue
+
+        group_key = _get_equation_group_key(metadata, text)
+
+        if group_key not in grouped_candidates:
+            grouped_candidates[group_key] = {
+                "metadata": metadata,
+                "texts": [],
+            }
+
+        if text.strip() not in grouped_candidates[group_key]["texts"]:
+            grouped_candidates[group_key]["texts"].append(text.strip())
+
+    if grouped_candidates:
+        for candidate in grouped_candidates.values():
+            metadata = candidate["metadata"]
+            text = "\n\n".join(candidate["texts"])
+            candidate_block = _format_equation_candidate(metadata, text)
+
+            if enable_ocr_repair:
+                candidate_block = _repair_equation_candidate_with_ocr(
+                    candidate_block
+                )
+
+            equation_candidates.append(candidate_block)
+
+        deduped_candidates = list(
+            OrderedDict(
+                (
+                    _clean_candidate_key(candidate),
+                    candidate,
+                )
+                for candidate in equation_candidates
+            ).values()
+        )
+
+        included_candidates = deduped_candidates[:max_equation_candidates]
+
+        print(
+            "DISCOVERY: equation candidates "
+            f"raw={raw_candidate_count} "
+            f"deduped={len(deduped_candidates)} "
+            f"included={len(included_candidates)} "
+            f"skipped_noise={skipped_noise_count}"
+        )
+
+        for index, candidate in enumerate(included_candidates[:10], start=1):
+            first_line = next(
+                (
+                    line.strip()
+                    for line in candidate.splitlines()
+                    if line.strip()
+                ),
+                "unknown",
+            )
+            print(f"DISCOVERY: equation candidate {index}: {first_line}")
+
+        return included_candidates
 
     equation_pattern = re.compile(
         r"("
@@ -157,17 +312,39 @@ def search_equation_candidates(
             if len(neighborhood) < 20:
                 continue
 
+            raw_candidate_count += 1
+
             candidate_block = f"""
                 [page {page}]
                 {neighborhood}
                 """
 
-            candidate_block = _repair_equation_candidate_with_ocr(
-                candidate_block
-            )
+            if enable_ocr_repair:
+                candidate_block = _repair_equation_candidate_with_ocr(
+                    candidate_block
+                )
 
             equation_candidates.append(candidate_block)
 
     equation_candidates = list(dict.fromkeys(equation_candidates))
+    included_candidates = equation_candidates[:max_equation_candidates]
 
-    return equation_candidates[:max_equation_candidates]
+    print(
+        "DISCOVERY: equation candidates "
+        f"raw={raw_candidate_count} "
+        f"deduped={len(equation_candidates)} "
+        f"included={len(included_candidates)}"
+    )
+
+    for index, candidate in enumerate(included_candidates[:10], start=1):
+        first_line = next(
+            (
+                line.strip()
+                for line in candidate.splitlines()
+                if line.strip()
+            ),
+            "unknown",
+        )
+        print(f"DISCOVERY: equation candidate {index}: {first_line}")
+
+    return included_candidates

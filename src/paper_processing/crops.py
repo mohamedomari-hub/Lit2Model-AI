@@ -1,3 +1,7 @@
+"""
+PDF page rendering and crop helpers for equations and figures.
+"""
+
 import os
 
 import fitz

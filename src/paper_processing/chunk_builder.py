@@ -1,3 +1,7 @@
+"""
+Builds page-aware scientific text chunks for extraction.
+"""
+
 from __future__ import annotations
 
 import json

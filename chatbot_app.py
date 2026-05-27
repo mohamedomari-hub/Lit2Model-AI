@@ -44,8 +44,8 @@ from src.app.io import (
 )
 from src.app.state import reset_workflow_state
 from src.app.theme import apply_theme
-from src.ingestion.pdf_parser import parse_pdf_multimodal
-from src.ingestion.ocr import (
+from src.paper_processing.pdf_parser import parse_pdf_multimodal
+from src.paper_processing.ocr import (
     extract_visible_equations_with_gpt,
 )
 from src.retrieval.vector_store import build_vector_store, load_vector_store, get_chroma_dir
@@ -58,7 +58,7 @@ from src.chat.chat_agent import build_agent
 from src.modeling.plan_simulations import infer_simulation_requirements
 from src.modeling.generate_model import save_generated_python_model
 
-from src.modeling.validate_model import parse_equations
+from src.modeling.model_validation import parse_equations
 from src.app.renderers import (
     render_discovery_review,
     render_markdown_with_latex,
@@ -395,6 +395,10 @@ def show_project_mechanism_flowchart():
         load_json_file(PROJECT_DRAFT_JSON_PATH)
         or load_json_file(PROJECT_EVIDENCE_JSON_PATH)
     )
+
+    if not isinstance(extracted_json, dict):
+        st.info("No mechanism flowchart JSON found yet.")
+        return
 
     mermaid_code = extracted_json.get("mechanism_flowchart", "")
 
@@ -1858,7 +1862,7 @@ if mode == "Ask paper questions":
             st.success(f"You asked: {prompt}")
 
         text_prompt = st.chat_input(
-            "Ask questions about the paper, i.e. equations, tables, figure, or mechanism ..."
+            "Ask questions about the paper... "
 
         )
 
@@ -1999,6 +2003,7 @@ Style:
             {"role": "assistant", "content": answer}
         )
         st.session_state.latest_paper_answer = answer
+        st.rerun()
 
     if st.session_state.latest_paper_answer:
         with chat_col:
@@ -2022,7 +2027,7 @@ elif mode == "Run model discovery":
         """
         <div class="page-title">
             Run Mechanistic Model Discovery
-            <span class="page-title-note">- requires human review</span>
+            <span class="page-title-note">- Requires Human Review</span>
         </div>
         """,
         unsafe_allow_html=True,
@@ -2128,7 +2133,9 @@ elif mode == "Run model discovery":
             status_text.info("Retrieving model-relevant context...")
             progress_bar.progress(45)
 
-            status_text.info("LLM extracting structured model evidence...")
+            status_text.info(
+                "Running controlled discovery. This may include equation scanning and OCR checks..."
+            )
             progress_bar.progress(65)
 
             answer = run_controlled_discovery(
@@ -2139,7 +2146,7 @@ elif mode == "Run model discovery":
 
             sync_global_discovery_artifacts_to_project()
 
-            status_text.info("Saving and formatting discovery review...")
+            status_text.info("Formatting discovery review...")
             progress_bar.progress(90)
 
             st.session_state.model_discovery_result = answer

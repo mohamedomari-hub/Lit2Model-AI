@@ -1,3 +1,7 @@
+"""
+Schema for simulation requirements.
+"""
+
 from typing import List, Optional
 
 from pydantic import BaseModel

@@ -1,3 +1,7 @@
+"""
+Shared figure retrieval wrapper.
+"""
+
 from src.modeling.figure_extraction import retrieve_figure_context_service
 
 

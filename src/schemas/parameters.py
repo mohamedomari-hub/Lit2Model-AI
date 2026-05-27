@@ -1,3 +1,7 @@
+"""
+Schema for model parameters.
+"""
+
 from typing import Optional
 
 from pydantic import BaseModel

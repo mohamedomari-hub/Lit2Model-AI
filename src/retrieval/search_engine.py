@@ -1,5 +1,9 @@
+"""
+Generic retrieval helpers used by Q/A and discovery.
+"""
+
 from src.retrieval.metadata import format_doc_metadata
-from src.retrieval.ranking import make_chunk_key, sort_docs_for_discovery
+from src.retrieval.evidence_ranking import make_chunk_key, sort_docs_for_discovery
 
 
 SEMANTIC_CONTEXTS = {

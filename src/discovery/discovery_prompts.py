@@ -1,3 +1,7 @@
+"""
+Prompt text used for controlled mechanistic model discovery.
+"""
+
 SYSTEM_PROMPT = """
 You are a mechanistic model discovery assistant.
 

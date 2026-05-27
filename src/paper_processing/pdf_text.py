@@ -1,3 +1,7 @@
+"""
+Simple page-by-page PDF text extraction for discovery chunks.
+"""
+
 from __future__ import annotations
 
 import json

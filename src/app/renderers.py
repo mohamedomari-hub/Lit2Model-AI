@@ -1,3 +1,7 @@
+"""
+Streamlit rendering helpers for equations, PDF previews, and discovery reviews.
+"""
+
 import base64
 import html
 import os

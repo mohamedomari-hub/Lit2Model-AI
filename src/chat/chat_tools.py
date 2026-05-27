@@ -1,3 +1,7 @@
+"""
+LangChain tool functions used by the Q/A agent.
+"""
+
 from langchain_core.tools import tool
 
 from src.modeling.generate_model import (
@@ -8,7 +12,7 @@ from src.retrieval import retrieve_semantic_context
 from src.retrieval.equation_search import search_equations
 from src.retrieval.figure_search import search_figures
 from src.retrieval.mechanism_search import search_mechanisms
-from src.retrieval.paper_search import search_paper
+from src.retrieval.text_search import search_paper
 from src.retrieval.parameter_search import search_parameters
 from src.retrieval.simulation_search import search_simulations
 from src.retrieval.table_search import search_tables
@@ -32,7 +36,9 @@ def set_vector_store(vector_store):
 @tool
 def retrieve_text_context(query: str, k: int = 6) -> str:
     """Retrieve general text evidence from the paper."""
-    return search_paper(VECTOR_STORE, query, k=k)
+    context = search_paper(VECTOR_STORE, query, k=k)
+    print(f"QA: text_context_chars={len(context)}")
+    return context
 
 
 @tool
@@ -48,12 +54,14 @@ def retrieve_equation_context(
     ocr_mode: str = "auto",
 ) -> str:
     """Retrieve equations, ODEs, algebraic equations, and symbols."""
-    return search_equations(
+    context = search_equations(
         vector_store=VECTOR_STORE,
         query=query,
         equation_number=equation_number,
         pdf_path=ACTIVE_PDF_PATH,
     )
+    print(f"QA: equation_context_chars={len(context)}")
+    return context
 
 
 @tool

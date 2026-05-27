@@ -1,8 +1,13 @@
+"""
+Main controlled mechanistic model discovery workflow.
+"""
+
 from __future__ import annotations
 
 import json
 import os
 import re
+import time
 from collections import OrderedDict
 from typing import Any
 
@@ -10,15 +15,15 @@ from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-from src.ingestion.pdf_parser import extract_equation_candidates_with_pymupdf
-from src.ingestion.ocr import extract_visible_equations_with_gpt
+from src.paper_processing.pdf_parser import extract_equation_candidates_with_pymupdf
+from src.paper_processing.ocr import extract_visible_equations_with_gpt
 from src.discovery.discovery_prompts import SYSTEM_PROMPT
 from src.retrieval.equation_search import (
     search_equation_candidates,
 )
-from src.retrieval.paper_search import search_discovery_context
+from src.retrieval.text_search import search_discovery_context
 from src.retrieval.table_search import search_table_evidence
-from src.discovery.review_formatter import format_compact_review
+from src.discovery.discovery_formatters import format_compact_review
 
 
 load_dotenv()
@@ -213,7 +218,7 @@ def retrieve_discovery_context(
 ) -> str:
     # Discovery currently keeps custom document-level retrieval because it needs raw docs,
     # metadata, deduplication, and equation candidate scanning.
-    # Later this should be moved into src/retrieval/paper_search.py.
+    # Later this should be moved into src/retrieval/text_search.py.
     # Kept custom discovery logic for now.
     unique_docs, retrieved_context = search_discovery_context(
         vector_store=vector_store,
@@ -222,14 +227,22 @@ def retrieve_discovery_context(
         max_total_chars=max_total_chars,
     )
 
+    print("DISCOVERY: searching equation candidates")
+
     equation_candidates = search_equation_candidates(
         vector_store=vector_store,
         max_equation_candidates=max_equation_candidates,
+        enable_ocr_repair=False,
     )
+
+    print(f"DISCOVERY: equation candidates found={len(equation_candidates)}")
 
     equation_text = "\n".join(
         equation_candidates[:max_equation_candidates]
     )
+
+    print(f"DISCOVERY: equation_text chars={len(equation_text)}")
+    print(f"DISCOVERY: discovery_context chars={len(retrieved_context)}")
 
     return f"""
 
@@ -520,8 +533,17 @@ def run_controlled_discovery(
     model: str = "gpt-4o-mini",
     equation_candidates_dir: str | None = None,
 ) -> str:
+    start_time = time.perf_counter()
+
+    def log_step(message: str):
+        elapsed = time.perf_counter() - start_time
+        print(f"DISCOVERY {elapsed:0.1f}s: {message}")
+
+    log_step("START discovery")
+
     if pdf_path and equation_candidates_dir:
         try:
+            log_step("extracting equation candidates")
             extract_equation_candidates_with_pymupdf(
                 pdf_path=pdf_path,
                 output_dir=equation_candidates_dir,
@@ -536,20 +558,22 @@ def run_controlled_discovery(
                 error,
             )
 
-    print("DISCOVERY STEP A: retrieving discovery context...")
+    log_step("retrieving discovery context")
 
     context = retrieve_discovery_context(vector_store=vector_store)
+
+    log_step(f"discovery context ready. chars={len(context)}")
+
+    log_step("retrieving table evidence")
+
     table_evidence = retrieve_table_evidence(vector_store=vector_store)
 
-    print(f"DISCOVERY STEP B: context built. chars={len(context)}")
+    log_step(f"table evidence ready. chars={len(table_evidence)}")
 
+    log_step("building prompt")
     llm = get_discovery_llm(model)
 
-    print(f"DISCOVERY STEP C: calling LLM model={model}...")
-
-
-    response = llm.invoke(
-        f"""
+    final_prompt = f"""
 {SYSTEM_PROMPT}
 
 TABLE PARAMETER EVIDENCE:
@@ -567,14 +591,24 @@ RETRIEVED MODEL/EQUATION CONTEXT:
 {context}
 
 """
-    )
 
-    print("DISCOVERY STEP D: LLM response received.")
+    log_step(f"final prompt chars={len(final_prompt)}")
+
+    log_step(f"calling LLM model={model}")
+
+
+    response = llm.invoke(final_prompt)
+
+    log_step("LLM response received")
 
     result = _safe_json_parse(response.content)
     result = _normalize_result(result)
 
+    log_step("formatting/saving result")
+
     markdown = format_compact_review(result)
     _save_outputs(result, markdown)
+
+    log_step("DONE discovery")
 
     return markdown

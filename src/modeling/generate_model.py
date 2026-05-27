@@ -1,20 +1,24 @@
+"""
+Generates executable Python model code from reviewed model evidence.
+"""
+
 import os
 import re
 import json
 from langchain_openai import ChatOpenAI
 
-from src.ingestion.scientific_assets import (
+from src.paper_processing.paper_assets import (
     save_artifact_index,
     format_artifact_index_for_review,
 )
 
-from src.ingestion.ocr import extract_equations_with_gemini
+from src.paper_processing.ocr import extract_equations_with_gemini
 from src.modeling.equation_recovery import (
     extract_equation_candidates_from_text_layer,
     recover_missing_numbered_equations,
 )
 
-from src.ingestion.scientific_assets import (
+from src.paper_processing.paper_assets import (
     save_artifact_index,
     format_artifact_index_for_review,
 )
@@ -24,7 +28,7 @@ from src.modeling.graph_generation import (
     generate_mechanism_graph_service,
 )
 from src.retrieval import multi_query_retrieve
-from src.retrieval.context import retrieve_semantic_context
+from src.retrieval.search_engine import retrieve_semantic_context
 from src.retrieval import retrieve_equation_context_service
 
 VECTOR_STORE = None

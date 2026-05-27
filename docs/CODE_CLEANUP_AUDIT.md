@@ -15,37 +15,37 @@ Status values: `ACTIVE`, `UNUSED_CANDIDATE`, `REVIEW_REQUIRED`
 | `src/discovery/discovery_prompts.py` | ACTIVE | Imported by `run_model_discovery.py`. | NO |
 | `src/discovery/run_model_discovery.py` | ACTIVE | Imported by `chatbot_app.py`; controlled discovery entry point. | NO |
 | `src/discovery/discovery_pipeline.py` | REVIEW_REQUIRED | Imported by `chatbot_app.py`; no call found by grep. | MAYBE |
-| `src/ingestion/candidate_classifier.py` | ACTIVE | Imported by `src.ingestion.scientific_assets`. | NO |
-| `src/ingestion/chunk_builder.py` | ACTIVE | Used by `src.discovery.discovery_pipeline`. | NO |
-| `src/ingestion/pdf_text.py` | ACTIVE | Used by `src.discovery.discovery_pipeline`. | NO |
-| `src/ingestion/crops.py` | ACTIVE | Used by equation/figure extraction. | NO |
-| `src/ingestion/ocr.py` | ACTIVE | Used by app, retrieval, discovery, and modelling. | NO |
-| `src/ingestion/pdf_parser.py` | ACTIVE | Imported by `chatbot_app.py`; main PDF parser. | NO |
-| `src/ingestion/scientific_assets.py` | ACTIVE | Used by model generation and candidate classifier. | NO |
-| `src/ingestion/metadata.py` | UNUSED_CANDIDATE | No imports or references found in current source grep. | YES |
+| `src/paper_processing/candidate_classifier.py` | ACTIVE | Imported by `src.paper_processing.paper_assets`. | NO |
+| `src/paper_processing/chunk_builder.py` | ACTIVE | Used by `src.discovery.discovery_pipeline`. | NO |
+| `src/paper_processing/pdf_text.py` | ACTIVE | Used by `src.discovery.discovery_pipeline`. | NO |
+| `src/paper_processing/crops.py` | ACTIVE | Used by equation/figure extraction. | NO |
+| `src/paper_processing/ocr.py` | ACTIVE | Used by app, retrieval, discovery, and modelling. | NO |
+| `src/paper_processing/pdf_parser.py` | ACTIVE | Imported by `chatbot_app.py`; main PDF parser. | NO |
+| `src/paper_processing/scientific_assets.py` | ACTIVE | Used by model generation and candidate classifier. | NO |
+| `src/paper_processing/metadata.py` | UNUSED_CANDIDATE | No imports or references found in current source grep. | YES |
 | `src/discovery/structured_extractor.py` | ACTIVE | Used by `src.discovery.discovery_pipeline`. | NO |
-| `src/modeling/consistency_checks.py` | ACTIVE | Re-exported by `validate_model.py`. | NO |
+| `src/modeling/model_validation.py` | ACTIVE | Re-exported by `validate_model.py`. | NO |
 | `src/modeling/equation_recovery.py` | ACTIVE | Used by retrieval/model generation for equation recovery. | NO |
 | `src/modeling/figure_extraction.py` | ACTIVE | Used by `src.retrieval.figure_search`. | NO |
 | `src/modeling/generate_model.py` | ACTIVE | Used by chat tools and `chatbot_app.py`. | NO |
 | `src/modeling/graph_generation.py` | ACTIVE | Used by `src.modeling.generate_model`. | NO |
 | `src/modeling/plan_simulations.py` | ACTIVE | Imported by `chatbot_app.py`. | NO |
 | `src/modeling/table_extraction.py` | ACTIVE | Used by `src.retrieval.table_search`. | NO |
-| `src/modeling/validate_model.py` | ACTIVE | Imported by `chatbot_app.py`. | NO |
+| `src/modeling/model_validation.py` | ACTIVE | Imported by `chatbot_app.py`. | NO |
 | `src/retrieval/__init__.py` | ACTIVE | Re-exports retrieval helpers used by project modules. | NO |
-| `src/retrieval/context.py` | ACTIVE | Core semantic retrieval service. | NO |
+| `src/retrieval/search_engine.py` | ACTIVE | Core semantic retrieval service. | NO |
 | `src/retrieval/equation_search.py` | ACTIVE | Shared equation retrieval/candidate helpers. | NO |
 | `src/retrieval/figure_search.py` | ACTIVE | Shared figure retrieval wrapper. | NO |
 | `src/retrieval/mechanism_search.py` | ACTIVE | Shared mechanism retrieval helpers. | NO |
 | `src/retrieval/metadata.py` | ACTIVE | Used by retrieval context and retrieval exports. | NO |
-| `src/retrieval/paper_search.py` | ACTIVE | Shared paper/discovery retrieval helpers. | NO |
+| `src/retrieval/text_search.py` | ACTIVE | Shared paper/discovery retrieval helpers. | NO |
 | `src/retrieval/parameter_search.py` | ACTIVE | Shared parameter retrieval helpers. | NO |
-| `src/retrieval/ranking.py` | ACTIVE | Used by retrieval context and exports. | NO |
+| `src/retrieval/evidence_ranking.py` | ACTIVE | Used by retrieval context and exports. | NO |
 | `src/retrieval/simulation_search.py` | ACTIVE | Shared simulation retrieval wrapper. | NO |
 | `src/retrieval/table_search.py` | ACTIVE | Shared table retrieval/evidence helpers. | NO |
 | `src/retrieval/vector_store.py` | ACTIVE | Imported by `chatbot_app.py`; Chroma/vector store setup. | NO |
 | `src/discovery/compact_formatter.py` | ACTIVE | Used by controlled discovery output. | NO |
-| `src/discovery/evidence_formatter.py` | ACTIVE | Used by `src.discovery.discovery_pipeline`. | NO |
+| `src/discovery/discovery_formatters.py` | ACTIVE | Used by `src.discovery.discovery_pipeline`. | NO |
 | `src/schemas/evidence_schema.py` | ACTIVE | Used by LLM extractor and discovery pipeline. | NO |
 | `src/schemas/__init__.py` | REVIEW_REQUIRED | Re-exports schema classes; no direct current import found. | MAYBE |
 | `src/schemas/model_card.py` | REVIEW_REQUIRED | No direct current workflow import found. | MAYBE |
@@ -63,7 +63,7 @@ Status values: `ACTIVE`, `UNUSED_CANDIDATE`, `REVIEW_REQUIRED`
 
 | File | Why | Safe to remove? |
 |---|---|---|
-| `src/ingestion/metadata.py` | No imports or references found in current source grep. | YES |
+| `src/paper_processing/metadata.py` | No imports or references found in current source grep. | YES |
 
 ## Review Required
 
@@ -82,7 +82,7 @@ Status values: `ACTIVE`, `UNUSED_CANDIDATE`, `REVIEW_REQUIRED`
 
 ## Notes
 
-- `src/ingestion/extraction.py` no longer exists in `src`; it was archived earlier.
-- `src/ingestion/` currently contains `candidate_classifier.py` plus cache files.
+- `src/paper_processing/extraction.py` no longer exists in `src`; it was archived earlier.
+- `src/paper_processing/` currently contains `candidate_classifier.py` plus cache files.
 - Old compatibility wrapper files have been removed from `src`.
 - Some old wrapper paths remain mentioned in docs/README only, not active Python imports.

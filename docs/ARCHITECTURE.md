@@ -24,11 +24,11 @@ Shared retrieval layer. It contains wrappers for paper text, equations, paramete
 
 Model discovery workflow. It builds discovery context, calls the LLM, normalizes JSON output, and saves reviewed model evidence.
 
-`src/ingestion`
+`src/paper_processing`
 
 PDF parsing, OCR, crop rendering, metadata helpers, and scientific artifact indexing.
 
-`src/ingestion`
+`src/paper_processing`
 
 Lower-level PDF text extraction and scientific chunk building.
 
@@ -73,7 +73,7 @@ Examples:
 - `src/agent.py` imports from `src/chat/chat_agent.py`
 - `src/tools.py` imports from `src/chat/chat_tools.py`
 - `src/rag.py` imports from `src/retrieval/vector_store.py`
-- old `src/ingestion/*` files import from `src/ingestion/*`
+- old `src/paper_processing/*` files import from `src/paper_processing/*`
 - old discovery/modeling files import from clearer new modules
 
 ## Current Stable Status

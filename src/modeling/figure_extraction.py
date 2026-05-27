@@ -1,11 +1,15 @@
+"""
+Figure retrieval and OCR description helpers.
+"""
+
 import os
 import re
 
 import fitz
 from langchain_openai import ChatOpenAI
 
-from src.ingestion.crops import render_pdf_page_to_image
-from src.ingestion.ocr import describe_figure_with_gemini
+from src.paper_processing.crops import render_pdf_page_to_image
+from src.paper_processing.ocr import describe_figure_with_gemini
 from src.retrieval import format_doc_metadata, make_chunk_key
 
 VECTOR_STORE = None

@@ -1,8 +1,12 @@
+"""
+Shared table retrieval helpers for Q/A and discovery.
+"""
+
 import re
 from collections import OrderedDict
 
 from src.modeling.table_extraction import retrieve_table_context_service
-from src.retrieval.ranking import sort_docs_by_evidence_score
+from src.retrieval.evidence_ranking import sort_docs_by_evidence_score
 
 
 def search_tables(

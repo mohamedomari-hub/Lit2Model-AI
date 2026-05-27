@@ -1,8 +1,12 @@
+"""
+Shared parameter retrieval helpers for Q/A and discovery.
+"""
+
 import re
 from collections import OrderedDict
 
-from src.retrieval.context import retrieve_semantic_context
-from src.retrieval.ranking import sort_docs_by_evidence_score
+from src.retrieval.search_engine import retrieve_semantic_context
+from src.retrieval.evidence_ranking import sort_docs_by_evidence_score
 
 
 def search_parameters(

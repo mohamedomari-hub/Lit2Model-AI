@@ -1,3 +1,7 @@
+"""
+Schema for chunk-level extracted scientific evidence.
+"""
+
 from __future__ import annotations
 
 from typing import Literal

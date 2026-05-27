@@ -1,3 +1,7 @@
+"""
+Lightweight ranking helpers for scientific evidence chunks.
+"""
+
 def make_chunk_key(doc):
     metadata = doc.metadata or {}
 

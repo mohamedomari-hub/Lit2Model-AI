@@ -1,11 +1,15 @@
+"""
+Helpers for recovering numbered equations from text, crops, and OCR.
+"""
+
 import json
 import os
 import re
 
 import fitz
 
-from src.ingestion.crops import render_pdf_page_for_equation
-from src.ingestion.ocr import (
+from src.paper_processing.crops import render_pdf_page_for_equation
+from src.paper_processing.ocr import (
     extract_equation_with_gpt,
     extract_equation_with_pix2tex,
 )
@@ -549,8 +553,12 @@ def retrieve_numbered_equation_context(
         print(
             f"[Equation Recovery] "
             f"Found text-layer/vector candidates for Equation {equation_number}, "
-            f"but using OCR-first recovery for equations."
+            f"returning text-layer/vector context before OCR."
         )
+        context = "\n\n---\n\n".join(exact_formula_results)
+        print(f"QA: equation_retrieved_chunks={len(exact_formula_results)}")
+        print(f"QA: equation_context_chars={len(context)}")
+        return context
 
 
     if ACTIVE_PDF_PATH is not None:
@@ -564,9 +572,23 @@ def retrieve_numbered_equation_context(
 
         print(
             f"[Equation Recovery] "
-            f"Skipping PDF text-layer equation extraction for Equation {equation_number}. "
-            f"Using OCR-first recovery."
+            f"No exact vector match for Equation {equation_number}. "
+            f"Trying PDF text-layer extraction before OCR."
         )
+
+        extracted_text = extract_numbered_equation_text_from_pdf(
+            pdf_path=ACTIVE_PDF_PATH,
+            equation_number=equation_number,
+        )
+
+        if extracted_text is not None:
+            context = _format_numbered_equation_text_response(
+                equation_number=equation_number,
+                extracted=extracted_text,
+            )
+            print("QA: equation_retrieved_chunks=1")
+            print(f"QA: equation_context_chars={len(context)}")
+            return context
 
         page_number = extract_best_equation_page_from_context(
         fallback_text, equation_number)

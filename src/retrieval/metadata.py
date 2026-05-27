@@ -1,3 +1,7 @@
+"""
+Metadata formatting helpers for retrieved documents.
+"""
+
 def format_doc_metadata(doc, search_query: str, label: str) -> str:
     metadata = doc.metadata or {}
 

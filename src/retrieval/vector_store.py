@@ -1,3 +1,7 @@
+"""
+Builds and loads the Chroma vector database for paper chunks.
+"""
+
 import os
 import shutil
 

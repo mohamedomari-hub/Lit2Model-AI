@@ -1,3 +1,7 @@
+"""
+Exports structured data schemas used by extraction and modeling.
+"""
+
 from src.schemas.equations import Equation
 from src.schemas.inputs import ModelInput
 from src.schemas.mechanisms import Mechanism

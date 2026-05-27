@@ -1,3 +1,7 @@
+"""
+Builds the LangChain Q/A agent and its paper-grounded instructions.
+"""
+
 from langchain.agents import create_agent
 
 from src.chat.chat_tools import (
@@ -61,6 +65,13 @@ Tool routing:
 - figures/plots/diagrams -> retrieve_figure_context
 - simulation settings -> retrieve_simulation_context
 - assumptions/limitations -> retrieve_assumption_context
+
+For broad paper-level questions, including aim, objective, purpose, contribution,
+abstract, introduction, conclusion, what the paper is about, or paper summary:
+- Use retrieve_text_context first.
+- Search for broad textual context, not equation-specific context.
+- Prefer abstract, introduction, conclusion, and objective statements.
+- Only say evidence is limited if those sections are not retrieved.
 
 Workflow tools:
 - For "build model", "run discovery", "extract mechanistic model", or similar -> run_model_discovery_workflow

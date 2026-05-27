@@ -1,3 +1,7 @@
+"""
+Central project paths and configuration values for the Streamlit app.
+"""
+
 DEFAULT_PDF_PATH = "data/sample_papers/MetRep_Dexamethasone_Adm.pdf"
 UPLOAD_DIR = "data/uploaded_papers"
 OUTPUT_DIR = "outputs"

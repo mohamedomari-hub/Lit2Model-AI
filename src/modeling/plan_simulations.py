@@ -1,3 +1,7 @@
+"""
+Infers simulation setup requirements from reviewed model evidence.
+"""
+
 import json
 from typing import Any
 

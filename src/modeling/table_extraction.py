@@ -1,3 +1,7 @@
+"""
+Table retrieval helpers for scientific model evidence.
+"""
+
 import re
 import fitz
 

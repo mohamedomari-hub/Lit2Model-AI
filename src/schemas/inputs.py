@@ -1,3 +1,7 @@
+"""
+Schema for model inputs and interventions.
+"""
+
 from typing import Optional
 
 from pydantic import BaseModel

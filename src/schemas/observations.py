@@ -1,3 +1,7 @@
+"""
+Schema for observed variables and measurements.
+"""
+
 from typing import Optional
 
 from pydantic import BaseModel

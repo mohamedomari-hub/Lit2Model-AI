@@ -1,3 +1,7 @@
+"""
+Schema for the full extracted model card.
+"""
+
 from typing import List
 
 from pydantic import BaseModel

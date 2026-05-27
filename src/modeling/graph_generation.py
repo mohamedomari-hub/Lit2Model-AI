@@ -1,3 +1,7 @@
+"""
+Creates graph and flowchart representations of model mechanisms.
+"""
+
 from typing import List
 
 from langchain_openai import ChatOpenAI

@@ -1,3 +1,7 @@
+"""
+Classifies scientific PDF text blocks and visual candidates.
+"""
+
 from langchain_openai import ChatOpenAI
 
 

@@ -1,3 +1,7 @@
+"""
+Schema for extracted equations.
+"""
+
 from typing import Optional
 
 from pydantic import BaseModel

@@ -1,4 +1,8 @@
-from src.retrieval.context import retrieve_semantic_context
+"""
+Shared simulation-related retrieval wrapper.
+"""
+
+from src.retrieval.search_engine import retrieve_semantic_context
 
 
 def search_simulations(vector_store, query: str, k: int = 6) -> str:

@@ -1,3 +1,7 @@
+"""
+Sidebar navigation and workflow status display for the Streamlit app.
+"""
+
 import os
 
 import streamlit as st

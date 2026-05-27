@@ -1,3 +1,7 @@
+"""
+Small file loading and saving helpers used by the app.
+"""
+
 import os
 
 from src.app.config import (

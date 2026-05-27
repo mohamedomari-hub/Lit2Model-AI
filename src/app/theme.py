@@ -1,3 +1,7 @@
+"""
+Global Streamlit CSS theme and typography settings.
+"""
+
 import streamlit as st
 
 
