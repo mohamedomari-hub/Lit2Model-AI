@@ -43,7 +43,7 @@ def build_agent():
     ]
 
     agent = create_agent(
-        model="openai:gpt-4o-mini",
+        model="openai:gpt-4.1-mini",
         tools=tools,
         system_prompt="""
 You are a mechanistic modelling research assistant.

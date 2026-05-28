@@ -1828,7 +1828,7 @@ if mode == "Ask paper questions":
 
         render_pdf_viewer(
             st.session_state.pdf_path,
-            zoom=pdf_zoom
+            zoom=pdf_zoom,
         )
 
     # ==========================

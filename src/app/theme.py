@@ -64,12 +64,22 @@ def apply_theme():
             selected button: #0ea5d8 -> #38bdf8 -> #fda4af
             */
 
+            /* Main interface theme (sidebar intentionally excluded) */
             .stApp {
                 background:
-                    radial-gradient(circle at top left, rgba(168, 216, 255, 0.42), transparent 25rem),
-                    radial-gradient(circle at top right, rgba(248, 187, 217, 0.72), transparent 27rem),
-                    radial-gradient(circle at bottom left, rgba(198, 243, 255, 0.5), transparent 30rem),
-                    linear-gradient(180deg, #ffffff 0%, #d7eeff 44%, #f9d2e3 100%) !important;
+                    radial-gradient(circle at top left, rgba(230, 234, 240, 0.34), transparent 26rem),
+                    linear-gradient(180deg, #fafafa 0%, #f8f9fb 52%, #f7f8fa 100%) !important;
+                color: #242936 !important;
+            }
+
+            [data-testid="stAppViewContainer"] {
+                background:
+                    radial-gradient(circle at top left, rgba(230, 234, 240, 0.28), transparent 25rem),
+                    linear-gradient(180deg, #fafafa 0%, #f8f9fb 100%) !important;
+            }
+
+            [data-testid="stAppViewContainer"] .block-container {
+                color: #242936 !important;
             }
 
             [data-testid="stSidebar"] {
@@ -333,9 +343,9 @@ def apply_theme():
             .discovery-equation-block {
                 margin: 0.35rem 0 0.75rem 0 !important;
                 padding: 0.78rem 0.9rem !important;
-                background: linear-gradient(180deg, #ffffff 0%, #d7eeff 100%) !important;
-                border: 1px solid #bfe7ff !important;
-                border-left: 4px solid #0ea5d8 !important;
+                background: #ffffff !important;
+                border: 1px solid #e6eaf0 !important;
+                border-left: 4px solid #94a3b8 !important;
                 border-radius: 7px !important;
                 color: #0f172a !important;
                 font-family: "Cambria Math", "Times New Roman", "STIX Two Text", serif !important;
@@ -343,7 +353,7 @@ def apply_theme():
                 line-height: 1.58 !important;
                 white-space: pre-wrap !important;
                 overflow-x: auto !important;
-                box-shadow: 0 2px 10px rgba(56, 189, 248, 0.12) !important;
+                box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06) !important;
             }
 
             .discovery-review-marker {
@@ -407,7 +417,8 @@ def apply_theme():
             [data-testid="stExpander"] {
                 margin-top: 0.55rem !important;
                 margin-bottom: 0.85rem !important;
-                border-color: #f6afcf !important;
+                border-color: #e6eaf0 !important;
+                background: #ffffff !important;
             }
 
             [data-testid="stExpander"] details summary {
@@ -423,8 +434,8 @@ def apply_theme():
                 margin-top: 0.45rem !important;
                 margin-bottom: 0.2rem !important;
                 padding: 0.45rem 0.55rem !important;
-                background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(215, 238, 255, 0.78) 58%, rgba(249, 210, 227, 0.72) 100%) !important;
-                border: 1px solid #f6afcf !important;
+                background: #ffffff !important;
+                border: 1px solid #e6eaf0 !important;
                 border-radius: 9px !important;
             }
 

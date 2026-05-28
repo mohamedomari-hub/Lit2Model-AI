@@ -4,6 +4,7 @@ Streamlit rendering helpers for equations, PDF previews, and discovery reviews.
 
 import base64
 import html
+import json
 import os
 import re
 
@@ -139,7 +140,12 @@ def load_pdf_pages_for_viewer(
     return pages
 
 
-def render_pdf_viewer(pdf_path: str, height: int = 780, zoom: float = 1.35):
+def render_pdf_viewer(
+    pdf_path: str,
+    height: int = 780,
+    zoom: float = 1.35,
+    selected_page: int | None = None,
+):
     if not pdf_path or not os.path.exists(pdf_path):
         st.warning("PDF file not found.")
         return
@@ -150,10 +156,27 @@ def render_pdf_viewer(pdf_path: str, height: int = 780, zoom: float = 1.35):
         zoom=zoom,
     )
     visual_width = int(zoom * 100)
+    page_count = len(pages)
+    storage_key = (
+        "lit2model_pdf_scroll_"
+        + re.sub(r"[^A-Za-z0-9_.-]+", "_", os.path.abspath(pdf_path))
+    )
+    storage_key_json = json.dumps(storage_key)
+
+    if page_count == 0:
+        st.warning("PDF has no rendered pages.")
+        return
+
+    if selected_page is not None:
+        if selected_page < 1:
+            selected_page = 1
+
+        if selected_page > page_count:
+            selected_page = page_count
 
     page_html = "\n".join(
         f"""
-        <section class="pdf-page">
+        <section class="pdf-page" id="pdf-page-{page["page"]}">
             <div class="pdf-page-label">Page {page["page"]}</div>
             <img src="data:image/png;base64,{page["image"]}" />
         </section>
@@ -197,9 +220,72 @@ def render_pdf_viewer(pdf_path: str, height: int = 780, zoom: float = 1.35):
                 box-shadow: 0 1px 8px rgba(15, 23, 42, 0.12);
             }}
         </style>
-        <div class="pdf-scroll">
+        <div class="pdf-scroll" id="pdf-scroll-container">
             {page_html}
         </div>
+        <script>
+            const storageKey = {storage_key_json};
+            const scrollContainer = document.getElementById("pdf-scroll-container");
+            const selectedPage = {
+                "null"
+                if selected_page is None
+                else f'document.getElementById("pdf-page-{selected_page}")'
+            };
+
+            if (selectedPage && scrollContainer) {{
+                setTimeout(function() {{
+                    scrollContainer.scrollTop = selectedPage.offsetTop - scrollContainer.offsetTop;
+                }}, 80);
+            }}
+
+            if (!selectedPage && scrollContainer) {{
+                function savePdfScroll() {{
+                    const maxScroll = Math.max(
+                        scrollContainer.scrollHeight - scrollContainer.clientHeight,
+                        1
+                    );
+                    const scrollData = {{
+                        top: scrollContainer.scrollTop,
+                        ratio: scrollContainer.scrollTop / maxScroll
+                    }};
+                    window.localStorage.setItem(
+                        storageKey,
+                        JSON.stringify(scrollData)
+                    );
+                }}
+
+                function restorePdfScroll() {{
+                    const rawScrollData = window.localStorage.getItem(storageKey);
+
+                    if (!rawScrollData) {{
+                        return;
+                    }}
+
+                    try {{
+                        const scrollData = JSON.parse(rawScrollData);
+                        const maxScroll = Math.max(
+                            scrollContainer.scrollHeight - scrollContainer.clientHeight,
+                            1
+                        );
+                        const restoredTop = Math.round(
+                            (scrollData.ratio || 0) * maxScroll
+                        );
+                        scrollContainer.scrollTop = restoredTop || scrollData.top || 0;
+                    }} catch (error) {{
+                        scrollContainer.scrollTop = 0;
+                    }}
+                }}
+
+                scrollContainer.addEventListener(
+                    "scroll",
+                    savePdfScroll,
+                    {{ passive: true }}
+                );
+
+                setTimeout(restorePdfScroll, 80);
+                setTimeout(restorePdfScroll, 350);
+            }}
+        </script>
         """,
         height=height + 28,
     )
