@@ -289,6 +289,20 @@ def apply_theme():
                 display: none !important;
             }
 
+            .review-page-scroll-marker {
+                display: none !important;
+            }
+
+            div[data-testid="stVerticalBlock"]:has(.review-page-scroll-marker),
+            div[data-testid="stVerticalBlock"]:has(.review-page-scroll-marker) [data-testid="stVerticalBlock"],
+            div[data-testid="stVerticalBlock"]:has(.review-page-scroll-marker) [data-testid="stExpander"],
+            div[data-testid="stVerticalBlock"]:has(.review-page-scroll-marker) [data-testid="stExpander"] details {
+                height: auto !important;
+                min-height: auto !important;
+                max-height: none !important;
+                overflow: visible !important;
+            }
+
             div[data-testid="stVerticalBlock"]:has(.sticky-right-panel-marker) {
                 position: sticky !important;
                 top: 1rem !important;
@@ -354,6 +368,27 @@ def apply_theme():
                 white-space: pre-wrap !important;
                 overflow-x: auto !important;
                 box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06) !important;
+            }
+
+            [data-testid="stChatMessage"] .katex-display {
+                max-width: 100% !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                padding-bottom: 0.25rem !important;
+            }
+
+            [data-testid="stChatMessage"] .katex-display > .katex {
+                white-space: nowrap !important;
+            }
+
+            [data-testid="stChatMessage"] pre {
+                max-width: 100% !important;
+                overflow-x: auto !important;
+            }
+
+            [data-testid="stChatMessage"] code {
+                white-space: pre-wrap !important;
+                overflow-wrap: anywhere !important;
             }
 
             .discovery-review-marker {

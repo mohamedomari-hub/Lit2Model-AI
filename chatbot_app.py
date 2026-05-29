@@ -233,8 +233,37 @@ def clean_mermaid_flowchart(raw_text: str) -> str:
     Parameters/rate constants are avoided as boxes where possible.
     """
 
+    import networkx as nx
+
+    def normalize_node_label(name: str) -> str:
+        """
+        Reuse the same node when a variable/entity appears in multiple edges.
+        """
+        label = str(name or "").strip()
+        label = label.strip("`'\" ")
+
+        mermaid_match = re.match(
+            r"^[A-Za-z0-9_]+\s*\[\s*[\"']?(.+?)[\"']?\s*\]$",
+            label,
+        )
+
+        if mermaid_match:
+            label = mermaid_match.group(1).strip()
+
+        label = label.replace("C_{e}", "Ce")
+        label = label.replace("C_e", "Ce")
+        if label == "glucasec":
+            label = "glucasec-dxm"
+        label = label.replace("_", "-")
+        label = label.replace(" ", "-")
+        label = label.strip("-")
+        label = re.sub(r"\s+", " ", label)
+
+        return label
+
     def node_id(name: str) -> str:
-        return re.sub(r"[^A-Za-z0-9_]", "_", name.strip())
+        normalized_name = normalize_node_label(name)
+        return re.sub(r"[^A-Za-z0-9_]", "_", normalized_name.strip())
 
     def is_rate_or_parameter(name: str) -> bool:
         name_lower = name.strip().lower()
@@ -279,26 +308,37 @@ def clean_mermaid_flowchart(raw_text: str) -> str:
 
         return "process"
 
-    lines = []
+    graph = nx.DiGraph()
 
     for line in raw_text.splitlines():
         line = line.strip()
 
-        if not line or "-->" not in line:
+        if (
+            not line
+            or "-->" not in line
+            or line.lower().startswith("flowchart")
+            or line.lower().startswith("classdef")
+        ):
             continue
 
+        match_spaced_label = re.match(r"(.+?)\s+--\s*(.+?)\s*-->\s*(.+)", line)
         match_labeled = re.match(r"(.+?)-->\|(.+?)\|(.+)", line)
         match_unlabeled = re.match(r"(.+?)-->\s*(.+)", line)
 
-        if match_labeled:
-            source = match_labeled.group(1).strip()
-            relation = match_labeled.group(2).strip()
-            target = match_labeled.group(3).strip()
+        if match_spaced_label:
+            source = normalize_node_label(match_spaced_label.group(1))
+            relation = match_spaced_label.group(2).strip().replace("_", " ")
+            target = normalize_node_label(match_spaced_label.group(3))
+
+        elif match_labeled:
+            source = normalize_node_label(match_labeled.group(1))
+            relation = match_labeled.group(2).strip().replace("_", " ")
+            target = normalize_node_label(match_labeled.group(3))
 
         elif match_unlabeled:
-            source = match_unlabeled.group(1).strip()
-            relation = "affects"
-            target = match_unlabeled.group(2).strip()
+            source = normalize_node_label(match_unlabeled.group(1))
+            relation = ""
+            target = normalize_node_label(match_unlabeled.group(2))
 
         else:
             continue
@@ -307,20 +347,64 @@ def clean_mermaid_flowchart(raw_text: str) -> str:
         if is_rate_or_parameter(source) or is_rate_or_parameter(target):
             continue
 
+        if source == target:
+            continue
+
+        relation = relation.strip()
+
+        if graph.has_edge(source, target):
+            old_relation = graph[source][target].get("relation", "")
+
+            if not old_relation and relation:
+                graph[source][target]["relation"] = relation
+        else:
+            graph.add_edge(source, target, relation=relation)
+
+    if not graph.edges:
+        return raw_text
+
+    preferred_order = [
+        ("C", "Ce"),
+        ("Ce", "glucasec-dxm"),
+        ("Ce", "glulv-st-dxm"),
+        ("Ce", "glulv-fat-dxm"),
+        ("Ce", "glumilk-usage"),
+        ("Ce", "elimination"),
+    ]
+
+    ordered_edges = []
+    used_edges = set()
+
+    for edge in preferred_order:
+        if graph.has_edge(*edge):
+            ordered_edges.append(edge)
+            used_edges.add(edge)
+
+    for source, target in graph.edges:
+        edge = (source, target)
+
+        if edge not in used_edges:
+            ordered_edges.append(edge)
+
+    lines = []
+
+    for source, target in ordered_edges:
         source_id = node_id(source)
         target_id = node_id(target)
-
         source_class = node_class(source)
         target_class = node_class(target)
+        relation = graph[source][target].get("relation", "")
+
+        if relation:
+            arrow = f"-->|{relation}|"
+        else:
+            arrow = "-->"
 
         lines.append(
             f'{source_id}["{source}"]:::{source_class} '
-            f'-->|{relation}| '
+            f'{arrow} '
             f'{target_id}["{target}"]:::{target_class}'
         )
-
-    if not lines:
-        return raw_text
 
     return (
         "flowchart TD\n"
@@ -1548,7 +1632,7 @@ st.markdown(
 # --------------------------------------------------
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-st.sidebar.markdown("### Upload paper")
+st.sidebar.markdown("### Upload Paper")
 
 uploaded_file = st.sidebar.file_uploader(
     "PDF file",
@@ -1773,7 +1857,7 @@ os.makedirs(PROJECT_PATHS["equation_ocr_dir"], exist_ok=True)
 render_sidebar_navigation()
 
 st.sidebar.divider()
-if st.sidebar.button("Clear current project", use_container_width=True):
+if st.sidebar.button("Clear Current Project", use_container_width=True):
     clear_current_project_outputs()
     st.session_state.workflow_reset_notice = True
     st.rerun()
@@ -1897,6 +1981,11 @@ Tool routing:
 - figures/plots/diagrams -> retrieve_figure_context
 - simulation settings -> retrieve_simulation_context
 - assumptions/limitations/missing info -> retrieve_assumption_context
+- For "how is/are ... modeled", "effect of ... on ...", "mechanism of ...",
+  "mechanisms reported", or "how does ... affect ...", use both
+  retrieve_mechanism_context and retrieve_equation_context.
+- If parameters/constants/units are part of the mechanism question, also use
+  retrieve_parameter_context.
 
 Evidence rules:
 - Retrieve evidence before answering.
@@ -1904,6 +1993,21 @@ Evidence rules:
 - Do not use general scientific knowledge to fill missing definitions, values, mechanisms, or causal explanations.
 - Quote values and units only when explicitly retrieved.
 - If evidence is missing, ambiguous, or incomplete, say so clearly.
+
+Answer synthesis:
+- Be concise and demo-friendly.
+- Give the direct answer first in 1-2 sentences.
+- Merge overlapping evidence instead of repeating it by figure, chunk, or source.
+- Do not separately restate the same mechanism as "Figure 7", "Figure 8", and "Summary".
+- Aim for 80-140 words unless the user explicitly asks for detail.
+- Use compact bullets only when they improve clarity.
+- For modeling, mechanism, effect, ODE, parameter, or mathematical formulation questions, include the key retrieved equations/functions when they are central to the answer.
+- Keep equations compact and readable in plain text.
+- Mention sources briefly, for example: "Based on Figure 7, Figure 8, and referenced equations."
+- When the user asks how a biological, pharmacological, physical, or mechanistic effect is modeled, retrieve and report all equations directly relevant to that effect/process, not only a prose mechanism summary.
+- Include equation numbers if available.
+- If multiple related equations are retrieved, list them in a compact "Relevant equations" section.
+- For modeling/mechanism questions, use: Mechanism summary, Relevant equations, Key variables/parameters, Review note.
 
 Equation rules:
 - For numbered equations, including typos like "equa 7", use retrieve_equation_context first.
@@ -2200,6 +2304,11 @@ elif mode == "Run model discovery":
 # --------------------------------------------------
 
 elif mode == "Review & Validate Model":
+
+    st.markdown(
+        '<span class="review-page-scroll-marker"></span>',
+        unsafe_allow_html=True,
+    )
 
     st.markdown(
         '<div class="page-title">Review & Validate Model</div>',
@@ -2840,11 +2949,124 @@ elif mode == "Simulation setup":
     else:
         st.success("Using validated JSON model for simulation setup.")
 
-    if st.button("Validate equations"):
-        st.info(
-            "Equation validation will be refactored to read from reviewed JSON next. "
-            "For now, use Infer simulation requirements."
+    if st.button("Check reviewed model readiness"):
+        validation_issues = []
+
+        odes = review_source.get("odes", [])
+
+        if not odes:
+            validation_issues.append("No ODEs found in reviewed JSON.")
+
+        missing_values = {"", "missing", "not reported", "none", "null"}
+
+        for index, ode in enumerate(odes, start=1):
+            ode_label = ode.get("state") or f"ODE {index}"
+
+            if not str(ode.get("state", "")).strip():
+                validation_issues.append(f"{ode_label}: missing state.")
+
+            if not str(ode.get("equation", "")).strip():
+                validation_issues.append(f"{ode_label}: missing equation.")
+
+            initial_condition = ode.get("initial_condition", {})
+
+            if isinstance(initial_condition, dict):
+                initial_value = str(
+                    initial_condition.get("value", "")
+                ).strip().lower()
+
+                if initial_value in missing_values:
+                    validation_issues.append(
+                        f"{ode_label}: initial condition value is missing."
+                    )
+
+            for parameter in ode.get("parameters", []):
+                symbol = parameter.get("symbol") or parameter.get("name") or "parameter"
+                status = str(parameter.get("status", "")).strip().lower()
+                value = str(parameter.get("value", "")).strip().lower()
+
+                if status == "missing":
+                    validation_issues.append(
+                        f"{ode_label}: parameter {symbol} has status missing."
+                    )
+
+                if value in missing_values:
+                    validation_issues.append(
+                        f"{ode_label}: parameter {symbol} has missing value."
+                    )
+
+        process_modules = review_source.get("process_modules", [])
+
+        if "process_modules" in review_source and not process_modules:
+            validation_issues.append("No process modules found in reviewed JSON.")
+
+        for index, module in enumerate(process_modules, start=1):
+            module_label = module.get("name") or f"Process module {index}"
+            equations = module.get("equations", [])
+
+            if not equations:
+                validation_issues.append(
+                    f"{module_label}: no process equations found."
+                )
+
+            for equation_index, equation in enumerate(equations, start=1):
+                if isinstance(equation, dict):
+                    equation_text = str(equation.get("equation", "")).strip()
+                else:
+                    equation_text = str(equation).strip()
+
+                if not equation_text:
+                    validation_issues.append(
+                        f"{module_label}: equation {equation_index} is empty."
+                    )
+
+            for parameter in module.get("parameters", []):
+                symbol = parameter.get("symbol") or parameter.get("name") or "parameter"
+                status = str(parameter.get("status", "")).strip().lower()
+                value = str(parameter.get("value", "")).strip().lower()
+
+                if status == "missing":
+                    validation_issues.append(
+                        f"{module_label}: parameter {symbol} has status missing."
+                    )
+
+                if value in missing_values:
+                    validation_issues.append(
+                        f"{module_label}: parameter {symbol} has missing value."
+                    )
+
+        missing_for_simulation = review_source.get("missing_for_simulation", [])
+
+        for item in missing_for_simulation:
+            validation_issues.append(f"Missing for simulation: {item}")
+
+        report_lines = ["# Equation/model readiness check", ""]
+
+        if not validation_issues:
+            st.success("Equation/model readiness check passed for reviewed JSON.")
+            report_lines.append("Status: passed")
+        else:
+            st.warning("Reviewed JSON needs attention before simulation.")
+            report_lines.append("Status: needs attention")
+            report_lines.append("")
+            report_lines.append("Issues:")
+
+            for issue in validation_issues:
+                st.markdown(f"- {issue}")
+                report_lines.append(f"- {issue}")
+
+        validation_report_path = os.path.join(
+            PROJECT_PATHS["project_dir"],
+            "equation_validation_report.md",
         )
+
+        save_text_file(
+            validation_report_path,
+            "\n".join(report_lines),
+        )
+
+        st.caption(f"Saved report: {validation_report_path}")
+
     if st.button("Infer simulation requirements"):
 
         with st.spinner("Inferring simulation requirements..."):

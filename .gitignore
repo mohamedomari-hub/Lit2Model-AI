@@ -1,10 +1,38 @@
+# Operating system files
 .DS_Store
+
+# Python cache/build files
 __pycache__/
-*.pyc
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local virtual environments
 .venv/
 venv/
+env/
+
+# Secrets and local config
 .env
-outputs/
-data/
-.cache/
+.env.*
+!.env.example
 .streamlit/secrets.toml
+
+# Local app/cache data
+.cache/
+outputs/
+uploads/
+data/
+chroma_db/
+
+# Logs and generated audio
+*.log
+*.wav
+*.mp3
+
+# OCR/equation/generated artifacts
+**/equation_candidates/
+**/equation_pages/
+**/extracted_images/
+**/cache/

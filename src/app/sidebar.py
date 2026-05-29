@@ -39,13 +39,13 @@ def render_sidebar_navigation():
             "Model discovery is running. Please do not switch workflow pages until it finishes."
         )
 
-    st.sidebar.markdown("### Explore paper")
-    nav_button("Ask paper questions", "Ask paper questions")
+    st.sidebar.markdown("### Explore Paper")
+    nav_button("Ask Paper Questions", "Ask paper questions")
 
-    st.sidebar.markdown("### Model workflow")
-    nav_button("1. Run model discovery", "Run model discovery")
+    st.sidebar.markdown("### Model Workflow")
+    nav_button("1. Run Model Discovery", "Run model discovery")
     nav_button("2. Review & Validate Model", "Review & Validate Model")
-    nav_button("3. Simulation setup", "Simulation setup")
+    nav_button("3. Simulation Setup", "Simulation setup")
     nav_button("4. Generate Python Model", "Generate Python Model")
 
 

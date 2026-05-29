@@ -27,11 +27,118 @@ def render_markdown_with_latex(text: str):
     st.markdown(text, unsafe_allow_html=True)
 
 
+def format_equation_for_display(equation_text: str) -> str:
+    """
+    Make common LaTeX equation text easier to read in the UI.
+    This only changes display text, not saved extraction data.
+    """
+    def replace_fractions(value: str) -> str:
+        result = []
+        index = 0
+
+        while index < len(value):
+            frac_match = re.match(r"\\?frac\s*\{", value[index:])
+
+            if not frac_match:
+                result.append(value[index])
+                index += 1
+                continue
+
+            numerator_start = index + frac_match.end() - 1
+            numerator, after_numerator = read_braced_text(value, numerator_start)
+
+            if numerator is None:
+                result.append(value[index])
+                index += 1
+                continue
+
+            denominator_start = after_numerator
+
+            while denominator_start < len(value) and value[denominator_start].isspace():
+                denominator_start += 1
+
+            denominator, after_denominator = read_braced_text(value, denominator_start)
+
+            if denominator is None:
+                result.append(value[index])
+                index += 1
+                continue
+
+            numerator = replace_fractions(numerator)
+            denominator = replace_fractions(denominator)
+            if any(operator in denominator for operator in ["+", "-", "*", "/"]):
+                denominator = f"({denominator})"
+            result.append(f"({numerator} / {denominator})")
+            index = after_denominator
+
+        return "".join(result)
+
+    def read_braced_text(value: str, start_index: int):
+        if start_index >= len(value) or value[start_index] != "{":
+            return None, start_index
+
+        depth = 0
+
+        for index in range(start_index, len(value)):
+            character = value[index]
+
+            if character == "{":
+                depth += 1
+            elif character == "}":
+                depth -= 1
+
+                if depth == 0:
+                    return value[start_index + 1:index], index + 1
+
+        return None, start_index
+
+    text = str(equation_text or "")
+
+    text = text.replace("\\left", "")
+    text = text.replace("\\right", "")
+    text = text.replace("\\cdot", "*")
+    text = text.replace("\\times", "*")
+    text = text.replace("\\,", " ")
+    text = text.replace("\\;", " ")
+
+    text = replace_fractions(text)
+
+    text = re.sub(
+        r"\(\s*d\s*/\s*dt\s*\)\s*([A-Za-z][A-Za-z0-9_{}^-]*)",
+        r"d\1/dt",
+        text,
+    )
+
+    text = re.sub(r"\\mathrm\s*\{([^{}]+)\}", r"\1", text)
+    text = re.sub(r"\\text\s*\{([^{}]+)\}", r"\1", text)
+    text = re.sub(r"_\{([^{}]+)\}", r"\1", text)
+    text = re.sub(r"_([A-Za-z0-9]+)", r"\1", text)
+    text = re.sub(r"\^\{([^{}]+)\}", r"^\1", text)
+    text = re.sub(r"\\([A-Za-z]+)", r"\1", text)
+    text = text.replace("{", "")
+    text = text.replace("}", "")
+    text = re.sub(r"\s+", " ", text)
+    text = re.sub(r"([A-Za-z0-9])-([A-Za-z0-9])", r"\1§HYPHEN§\2", text)
+    text = re.sub(r"\s*([=+\-*/()])\s*", r" \1 ", text)
+    text = text.replace("§HYPHEN§", "-")
+    text = re.sub(r"d([A-Za-z0-9]+)\s*/\s*dt", r"d\1/dt", text)
+    text = re.sub(r"\s*\^\s*", "^", text)
+    text = re.sub(r"\(\s+", "(", text)
+    text = re.sub(r"\s+\)", ")", text)
+    text = re.sub(r"\s+", " ", text)
+
+    if text.count("=") > 1:
+        parts = [part.strip() for part in text.split("=")]
+        text = f"{parts[0]} = {parts[1]}"
+
+    return text.strip()
+
+
 def render_equation_block(equation_text: str):
     """
     Render one equation in a readable review style without changing saved content.
     """
-    equation_text = (equation_text or "").strip()
+    equation_text = format_equation_for_display(equation_text)
 
     if not equation_text:
         st.markdown(

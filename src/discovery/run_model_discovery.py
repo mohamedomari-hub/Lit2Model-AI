@@ -519,7 +519,7 @@ def get_discovery_llm(model: str):
             model=model,
             temperature=0,
             base_url="https://openrouter.ai/api/v1",
-            api_key=os.getenv("Openrouter_API_KEY"),
+            api_key=os.getenv("OPENROUTER_API_KEY"),
         )
 
     return ChatOpenAI(
