@@ -97,6 +97,42 @@ Architecture notes:
 
 ---
 
+## Project Structure
+
+```text
+lit2model-ai-v7/
+├── chatbot_app.py              # Main Streamlit entry point
+├── README.md
+├── requirements.txt
+├── .env.example
+├── Final_Project_Slides.pdf
+└── src/
+    ├── app/                    # UI helpers, theme, state, sidebar, renderers
+    ├── chat/                   # Q&A agent and retrieval tool wrappers
+    ├── paper_processing/       # PDF parsing, OCR, crops, chunking, assets
+    ├── retrieval/              # Vector store, search, ranking, evidence retrieval
+    ├── discovery/              # Model discovery workflow, prompts, formatters
+    ├── modeling/               # Validation, equation recovery, simulation/code generation
+    └── schemas/                # Pydantic schemas for structured model data
+```
+
+Main files:
+
+| File | Purpose |
+|---|---|
+| `chatbot_app.py` | Streamlit app and workflow routing |
+| `src/chat/chat_agent.py` | Q&A agent prompt and tool orchestration |
+| `src/chat/chat_tools.py` | Retrieval tools exposed to the Q&A agent |
+| `src/retrieval/vector_store.py` | ChromaDB creation/loading and embeddings |
+| `src/discovery/run_model_discovery.py` | Controlled model discovery pipeline |
+| `src/modeling/generate_model.py` | LLM-assisted Python model scaffold generation |
+| `src/modeling/model_validation.py` | Reviewed JSON/model readiness checks |
+| `src/paper_processing/pdf_parser.py` | PDF parsing using Docling/PyMuPDF tools |
+
+Generated files such as uploaded PDFs, ChromaDB stores, OCR crops, and model outputs are written to ignored local folders like `uploads/`, `outputs/`, `data/`, and `chroma_db/`.
+
+---
+
 ## Quickstart
 
 ```bash
