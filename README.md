@@ -12,6 +12,10 @@ The project is designed for scientific exploration and human-in-the-loop model r
 Watch the demo here:  
 https://drive.google.com/file/d/1p0apsd6rBBpI7IOlqAcIa0hv1kJQMgVS/view?usp=drive_link
 
+
+<img width="1440" height="900" alt="Demo_image" src="https://github.com/user-attachments/assets/6271bdb4-0312-4dad-b997-f7659e088c05" />
+
+
 Project presentation: `Final_Project_Slides.pdf`
 
 ---
