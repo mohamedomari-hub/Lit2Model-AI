@@ -79,12 +79,3 @@ Examples:
 ## Current Stable Status
 
 Q/A and model discovery now share retrieval capabilities through `src/retrieval`. Existing behavior is preserved through compatibility wrappers.
-
-## Future Cleanup
-
-Later, after full app testing:
-
-- update imports to use the new clearer paths directly
-- remove old compatibility wrapper files
-- finish moving remaining legacy retrieval helpers into `src/retrieval`
-- keep changes small and compile/test after each step
